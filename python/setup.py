@@ -37,6 +37,8 @@ class CMakeBuild(build_ext):
         ]
         if sys.platform.find('win32') != -1:
             cmake_args.append(f'-DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded')
+        elif sys.platform.find('darwin') != -1:
+            cmake_args.append(f'-DXGD_USE_OPENMP:BOOL=OFF')
 
         build_args = [
             '--parallel',
