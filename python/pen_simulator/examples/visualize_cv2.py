@@ -3,7 +3,6 @@ import argparse
 import cv2
 import numpy as np
 
-import az_init  # noqa # pylint: disable=unused-import
 import pen_simulator as ps
 
 WINDOW_WIDTH = 720

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
-import {Wrapper} from "@xgd/mathjax-fork";
+import {Wrapper} from "@xgd/mathjax-json";
 
 function cleanIm2Latex() {
     const root = path.resolve(os.homedir(), 'datasets/im2latex/raw');

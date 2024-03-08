@@ -1,30 +1,23 @@
 function(xgd_build_third_party)
     set(XGD_THIRD_PARTY_LIBS
-            abseil ade agg avalontoolkit
-            benchmark boost
-            cairo coordgen cppcoro cpufeatures cutlass
+            abseil ade avalontoolkit
+            boost
+            cairo coordgen cpufeatures
             eigen
-            # fluentui
-            # fontconfig
             freesasa freetype
-            ggml gtest
-            inchi indigo
-            # libexpat
+            gtest
+            inchi
             lbfgs libpng libxml2
             maeparser
-            nanosvg ncnn
-            openbabel opencv openssl
+            openbabel opencv
             pixman protobuf
             quickjs
-            rapidjson rdkit ringdecomposerlib rxcpp
+            rapidjson rdkit ringdecomposerlib
             skia
             spdlog svgpp
             taskflow tinyxml2
-            yaehmop yoga
-            zlib zstd zxing)
-    if (XGD_USE_QT)
-        list(APPEND XGD_THIRD_PARTY_LIBS nodeeditor)
-    endif ()
+            yaehmop
+            zlib zstd)
     foreach (XGD_THIRD_PARTY_LIB ${XGD_THIRD_PARTY_LIBS})
         include(${CMAKE_SOURCE_DIR}/cmake/build-${XGD_THIRD_PARTY_LIB}.cmake)
     endforeach ()

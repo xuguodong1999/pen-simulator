@@ -22,5 +22,4 @@ endif ()
 
 find_package(pybind11 REQUIRED)
 
-add_subdirectory(hello_py)
 add_subdirectory(pen_simulator)

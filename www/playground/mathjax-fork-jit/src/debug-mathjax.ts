@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import os from "os";
-import {Wrapper} from "@xgd/mathjax-fork";
+import {Wrapper} from "@xgd/mathjax-json";
 
 function writeDebugFile() {
     const tex1 = String.raw`

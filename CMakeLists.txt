@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(xgd-project VERSION 1.0.1 LANGUAGES C CXX)
+project(pen-simulator VERSION 0.0.1 LANGUAGES C CXX)
 
 enable_testing()
 
@@ -19,11 +19,6 @@ endif ()
 add_subdirectory(apps)
 add_subdirectory(lib)
 add_subdirectory(shadow_build)
-add_subdirectory(hello_world)
-
-if (XGD_USE_QT)
-    add_subdirectory(${XGD_THIRD_PARTY_DIR}/fluentui-src/fluentui/src/Qt6)
-endif ()
 
 if (NOT PYTHON_EXECUTABLE)
     message(STATUS "PYTHON_EXECUTABLE not set, python binding will not be built")

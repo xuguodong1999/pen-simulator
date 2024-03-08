@@ -3,7 +3,6 @@
   "useNx": false,
   "version": "independent",
   "packages": [
-    "applications/*",
     "packages/*",
     "playground/*",
     "tools/*"

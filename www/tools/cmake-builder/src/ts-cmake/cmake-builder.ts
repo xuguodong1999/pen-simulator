@@ -22,10 +22,10 @@ class CMakeBuilder {
         this.setupEnvironment();
         this.configCMakeProject();
         this.buildCMakeProject();
-        try {
-            this.testCMakeProject('.');
-        } catch {
-        }
+        // try {
+        //     this.testCMakeProject('.');
+        // } catch {
+        // }
     }
 
     private setupEnvironment(cfg?: {

@@ -2,7 +2,6 @@ import argparse
 
 import numpy as np
 
-import az_init  # noqa # pylint: disable=unused-import
 import pen_simulator as ps
 
 WINDOW_WIDTH = 720
@@ -77,10 +76,6 @@ SAMPLES = [
     (r'\sin(\alpha)\cos(\beta)=\frac{\sin(\alpha+\beta)+\sin(\alpha-\beta)}{2}', ps.TextType.LATEX, None),
 ]
 
-# Linux: --couch /mnt/data/datasets/SCUT_IRAC/Couch --makemeahanzi /home/xgd/git/_/web/makemeahanzi/graphics.txt
-# WSL2: --couch /home/xgd/datasets/SCUT_IRAC/Couch --makemeahanzi /home/xgd/git/_/web/makemeahanzi/graphics.txt
-# Windows: --couch D:/datasets/ntfs/SCUT_IRAC/Couch --makemeahanzi D:/git/_/web/makemeahanzi/graphics.txt
-# Mac: --couch /Users/xgd/datasets/SCUT_IRAC/Couch --makemeahanzi /Users/xgd/git/_/web/makemeahanzi/graphics.txt
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='visualization example of pen_simulator')
     parser.add_argument(

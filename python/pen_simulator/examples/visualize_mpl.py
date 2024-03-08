@@ -13,7 +13,6 @@ from matplotlib.transforms import Affine2D
 from matplotlib.transforms import Transform, Bbox
 from svgpath2mpl import parse_path
 
-import az_init  # noqa # pylint: disable=unused-import
 import pen_simulator as ps
 
 WINDOW_WIDTH = 720

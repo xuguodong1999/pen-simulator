@@ -13,7 +13,7 @@
   "author": "xuguodong1999",
   "license": "UNLICENSED",
   "dependencies": {
-    "@xgd/mathjax-fork": "workspace:^"
+    "@xgd/mathjax-json": "workspace:^"
   },
   "devDependencies": { }
 }
