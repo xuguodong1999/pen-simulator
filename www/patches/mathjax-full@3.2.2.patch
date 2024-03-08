@@ -1,0 +1,164 @@
+diff --git a/js/input/tex/Stack.js b/js/input/tex/Stack.js
+index 4734f78af9f80b18ff428fb2df6a2bd30618f436..19258f2711a2d86db401bebab7f6b38ccf81c22d 100644
+--- a/js/input/tex/Stack.js
++++ b/js/input/tex/Stack.js
+@@ -88,14 +88,14 @@ var Stack = (function () {
+                     continue;
+                 }
+                 this.stack.push(item);
+-                if (item.env) {
++                if (item._env) {
+                     if (item.copyEnv) {
+-                        Object.assign(item.env, this.env);
++                        Object.assign(item._env, this.env);
+                     }
+-                    this.env = item.env;
++                    this.env = item._env;
+                 }
+                 else {
+-                    item.env = this.env;
++                    item._env = this.env;
+                 }
+             }
+         }
+diff --git a/js/util/Styles.d.ts b/js/util/Styles.d.ts
+index c6d96a6b20cd68183e9a1bd09e062c977a120bde..25a664ddf060a6d7b3d0453827fe53a4ba4323df 100644
+--- a/js/util/Styles.d.ts
++++ b/js/util/Styles.d.ts
+@@ -13,7 +13,7 @@ export declare class Styles {
+     static pattern: {
+         [name: string]: RegExp;
+     };
+-    static connect: connections;
++    static _connect: connections;
+     protected styles: StyleList;
+     constructor(cssText?: string);
+     get cssText(): string;
+diff --git a/js/util/Styles.js b/js/util/Styles.js
+index 761de39c850b9dcb168997892a901f1167f12657..21e80a0ea66da0e8eb7dd3d2f3fd81d2016052e2 100644
+--- a/js/util/Styles.js
++++ b/js/util/Styles.js
+@@ -64,7 +64,7 @@ function splitTRBL(name) {
+         parts.push(parts[1]);
+     }
+     try {
+-        for (var _b = __values(Styles.connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
++        for (var _b = __values(Styles._connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
+             var child = _c.value;
+             this.setStyle(this.childName(name, child), parts.shift());
+         }
+@@ -79,7 +79,7 @@ function splitTRBL(name) {
+ }
+ function combineTRBL(name) {
+     var e_2, _a;
+-    var children = Styles.connect[name].children;
++    var children = Styles._connect[name].children;
+     var parts = [];
+     try {
+         for (var children_1 = __values(children), children_1_1 = children_1.next(); !children_1_1.done; children_1_1 = children_1.next()) {
+@@ -113,7 +113,7 @@ function combineTRBL(name) {
+ function splitSame(name) {
+     var e_3, _a;
+     try {
+-        for (var _b = __values(Styles.connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
++        for (var _b = __values(Styles._connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
+             var child = _c.value;
+             this.setStyle(this.childName(name, child), this.styles[name]);
+         }
+@@ -128,7 +128,7 @@ function splitSame(name) {
+ }
+ function combineSame(name) {
+     var e_4, _a;
+-    var children = __spreadArray([], __read(Styles.connect[name].children), false);
++    var children = __spreadArray([], __read(Styles._connect[name].children), false);
+     var value = this.styles[this.childName(name, children.shift())];
+     try {
+         for (var children_2 = __values(children), children_2_1 = children_2.next(); !children_2_1.done; children_2_1 = children_2.next()) {
+@@ -177,7 +177,7 @@ function splitWSC(name) {
+         finally { if (e_5) throw e_5.error; }
+     }
+     try {
+-        for (var _e = __values(Styles.connect[name].children), _f = _e.next(); !_f.done; _f = _e.next()) {
++        for (var _e = __values(Styles._connect[name].children), _f = _e.next(); !_f.done; _f = _e.next()) {
+             var child = _f.value;
+             this.setStyle(this.childName(name, child), parts[child]);
+         }
+@@ -194,7 +194,7 @@ function combineWSC(name) {
+     var e_7, _a;
+     var parts = [];
+     try {
+-        for (var _b = __values(Styles.connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
++        for (var _b = __values(Styles._connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
+             var child = _c.value;
+             var value = this.styles[this.childName(name, child)];
+             if (value) {
+@@ -300,7 +300,7 @@ function splitFont(name) {
+ function saveFontParts(name, value) {
+     var e_10, _a;
+     try {
+-        for (var _b = __values(Styles.connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
++        for (var _b = __values(Styles._connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
+             var child = _c.value;
+             var cname = this.childName(name, child);
+             if (Array.isArray(value[child])) {
+@@ -356,15 +356,15 @@ var Styles = (function () {
+     Styles.prototype.set = function (name, value) {
+         name = this.normalizeName(name);
+         this.setStyle(name, value);
+-        if (Styles.connect[name] && !Styles.connect[name].combine) {
++        if (Styles._connect[name] && !Styles._connect[name].combine) {
+             this.combineChildren(name);
+             delete this.styles[name];
+         }
+         while (name.match(/-/)) {
+             name = this.parentName(name);
+-            if (!Styles.connect[name])
++            if (!Styles._connect[name])
+                 break;
+-            Styles.connect[name].combine.call(this, name);
++            Styles._connect[name].combine.call(this, name);
+         }
+     };
+     Styles.prototype.get = function (name) {
+@@ -373,8 +373,8 @@ var Styles = (function () {
+     };
+     Styles.prototype.setStyle = function (name, value) {
+         this.styles[name] = value;
+-        if (Styles.connect[name] && Styles.connect[name].children) {
+-            Styles.connect[name].split.call(this, name);
++        if (Styles._connect[name] && Styles._connect[name].children) {
++            Styles._connect[name].split.call(this, name);
+         }
+         if (value === '') {
+             delete this.styles[name];
+@@ -384,10 +384,10 @@ var Styles = (function () {
+         var e_12, _a;
+         var parent = this.parentName(name);
+         try {
+-            for (var _b = __values(Styles.connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
++            for (var _b = __values(Styles._connect[name].children), _c = _b.next(); !_c.done; _c = _b.next()) {
+                 var child = _c.value;
+                 var cname = this.childName(parent, child);
+-                Styles.connect[cname].combine.call(this, cname);
++                Styles._connect[cname].combine.call(this, cname);
+             }
+         }
+         catch (e_12_1) { e_12 = { error: e_12_1 }; }
+@@ -406,7 +406,7 @@ var Styles = (function () {
+         if (child.match(/-/)) {
+             return child;
+         }
+-        if (Styles.connect[name] && !Styles.connect[name].combine) {
++        if (Styles._connect[name] && !Styles._connect[name].combine) {
+             child += name.replace(/.*-/, '-');
+             name = this.parentName(name);
+         }
+@@ -431,7 +431,7 @@ var Styles = (function () {
+         style: /([-a-z]+)[\s\n]*:[\s\n]*((?:'[^']*'|"[^"]*"|\n|.)*?)[\s\n]*(?:;|$)/g,
+         comment: /\/\*[^]*?\*\//g
+     };
+-    Styles.connect = {
++    Styles._connect = {
+         padding: {
+             children: TRBL,
+             split: splitTRBL,

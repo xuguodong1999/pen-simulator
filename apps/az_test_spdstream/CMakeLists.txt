@@ -1,0 +1,4 @@
+project(az-test-spdstream)
+xgd_add_executable(${PROJECT_NAME} SRC_DIRS ${CMAKE_CURRENT_SOURCE_DIR})
+xgd_link_libraries(${PROJECT_NAME} PRIVATE spdlog AzSpdStream)
+xgd_link_gtest(${PROJECT_NAME})

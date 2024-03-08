@@ -1,0 +1,21 @@
+{
+  "name": "@xgd/mathjax-json",
+  "version": "3.2.2",
+  "description": "",
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "xuguodong1999",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "mathjax-full": "3.2.2"
+  },
+  "devDependencies": {
+    "vite-plugin-dts": "^3.7.2",
+    "vite-plugin-static-copy": "^0.17.1"
+  }
+}

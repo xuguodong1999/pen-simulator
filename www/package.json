@@ -1,0 +1,51 @@
+{
+  "name": "@xgd/www",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "debug-hello-qt": "pnpm --filter @xgd/cmake-builder run build-linux-emcc && pnpm --filter @xgd/playground-cocr run build",
+    "post_install_electron": "node node_modules/.pnpm/electron@25.3.2/node_modules/electron/install.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "lerna run build",
+    "clean": "find . -type d -name node_modules -o -name dist | xargs rm -rf"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.9",
+    "@babel/plugin-transform-modules-commonjs": "^7.23.3",
+    "@babel/preset-env": "^7.23.9",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@types/node": "^20.11.17",
+    "lerna": "^7.4.2",
+    "npm": "^9.9.2",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.2",
+    "typescript": "^5.3.3",
+    "vite": "^4.5.2",
+    "vitest": "^0.33.0"
+  },
+  "resolutions": {
+    "@tensorflow/tfjs-core": "4.10.0",
+    "@tensorflow/tfjs-backend-cpu": "4.10.0",
+    "@tensorflow/tfjs-backend-webgl": "4.10.0",
+    "@types/xmldom": "0.1.31",
+    "paper": "0.12.17",
+    "katex": "0.16.8",
+    "mathjax-full": "3.2.2"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@tensorflow/tfjs-core@4.10.0": "patches/@tensorflow__tfjs-core@4.10.0.patch",
+      "@types/xmldom@0.1.31": "patches/@types__xmldom@0.1.31.patch",
+      "paper@0.12.17": "patches/paper@0.12.17.patch",
+      "katex@0.16.8": "patches/katex@0.16.8.patch",
+      "mathjax-full@3.2.2": "patches/mathjax-full@3.2.2.patch"
+    }
+  }
+}

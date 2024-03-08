@@ -1,0 +1,19 @@
+{
+  "name": "@xgd/mathjax-fork-jit",
+  "version": "3.2.2",
+  "description": "",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "start": "node dist/index.js",
+    "start-jit": "ts-node --transpile-only ./index.ts",
+    "build-and-run": "npm run build && npm run start"
+  },
+  "keywords": [],
+  "author": "xuguodong1999",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@xgd/mathjax-fork": "workspace:^"
+  },
+  "devDependencies": { }
+}

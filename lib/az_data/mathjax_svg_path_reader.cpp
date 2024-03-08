@@ -1,0 +1,1 @@
+#include "az/data/mathjax_svg_path_reader.h"
