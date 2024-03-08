@@ -45,11 +45,11 @@ void MolGraph::generate_3d() {
 }
 
 size_t MolGraph::bond_count() const {
-    return p->m_edges.size();
+    return boost::num_edges(*p);
 }
 
 size_t MolGraph::atom_count() const {
-    return p->m_vertices.size();
+    return boost::num_vertices(*p);
 }
 
 std::string MolGraph::to_format_openbabel_impl(std::string_view format) const {

@@ -122,7 +122,7 @@ static void sync_from_rd_mol(
         }
         auto [e, success] = add_edge(from_v, to_v, bond, g);
         if (!success) {
-            SPDLOG_ERROR("failed to insert openbabel bond: {} as bond: {}", rd_bond_id, bond.id);
+            SPDLOG_ERROR("failed to insert rdkit bond: {} as bond: {}", rd_bond_id, bond.id);
         }
     }
 //    mol.debugMol(std::cout);
