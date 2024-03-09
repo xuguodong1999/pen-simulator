@@ -20,6 +20,7 @@
 
 #include <string>
 #include <vector>
+#include <limits>
 #include <unordered_set>
 
 namespace po = boost::program_options;
@@ -92,7 +93,7 @@ Usage)", 120);
         input_list = generate_full_alkane_isomer_samples((int8_t) carbon_num);
     } else {
         const auto input = vm.at("input").as<std::string>();
-        SPDLOG_ERROR("input={}", input);
+        SPDLOG_INFO("input={}", input);
         std::ifstream in(input);
         if (!in.is_open()) {
             SPDLOG_ERROR("failed to open {}", input, input_list.size());
@@ -165,18 +166,19 @@ Usage)", 120);
     bool show_gui = output_directory.empty();
 
     tf::Taskflow taskflow;
-    taskflow.for_each_index(size_t{0}, input_list.size(), size_t{1}, [&](size_t i) {
+    size_t limit = (std::min)(input_list.size(), vm.at("limit").as<size_t>());
+    taskflow.for_each_index(size_t{0}, limit, size_t{1}, [&](size_t i) {
         const auto &[content, source_type, text_type] = input_list[i];
         SPDLOG_INFO("handle [{}][{}]: \n******\n{}\n******", source_type, text_type, content);
         auto pen_op = scheduler(content, source_type, text_type);
         ScalarType width = 64, height = 64;
         if (auto pen_graph = std::dynamic_pointer_cast<PenGraph>(pen_op)) {
             auto size = pen_graph->adjust_size_for_rendering(
-                    IDEAL_ITEM_SIZE, MAX_RENDER_SIZE, BLANK_PADDING_RATIO);
+                    IDEAL_ITEM_SIZE, MAX_RENDER_SIZE / BLANK_PADDING_RATIO, BLANK_PADDING_RATIO);
             width = size.x();
             height = size.y();
         }
-        if (!((0 < width && width < MAX_RENDER_SIZE) && (0 < height && height < MAX_RENDER_SIZE))) {
+        if (!((0 < width && width < MAX_RENDER_SIZE + 1) && (0 < height && height < MAX_RENDER_SIZE + 1))) {
             SPDLOG_ERROR("skip invalid render size={}x{}", width, height);
             width = 64;
             height = 64;
@@ -235,6 +237,8 @@ makemeahanzi
              "path to output frames directory, \ndisplay with opencv highgui if left empty")
             ("threads", po::value<size_t>()->default_value(8),
              "when output is specified, run in parallel")
+            ("limit", po::value<size_t>()->default_value(std::numeric_limits<size_t>::max()),
+             "if samples in json exceed limit, break generation")
             ("multiply", po::value<int>()->default_value(0),
              "if > 0, ignore input and display number multiply examples")
             ("isomer", po::value<int>()->default_value(0),

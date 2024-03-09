@@ -136,6 +136,9 @@ namespace az {
 
     template<typename T>
     T vector_medium(const std::vector<T> &src) {
+        if (src.empty()) {
+            throw std::runtime_error("vector_medium: empty list");
+        }
         std::priority_queue<T> g, s;
         for (size_t i = 0; i < src.size(); i++) {
             s.push(src[i]);

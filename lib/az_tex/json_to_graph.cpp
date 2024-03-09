@@ -69,6 +69,7 @@ namespace az::tex::mathjax::impl {
                 .y1 = extract_css_size(attr.y1),
                 .x2 = extract_css_size(attr.x2),
                 .y2 = extract_css_size(attr.y2),
+                .data_frame = (attr.data_frame == "true"),
         };
         if (attr.xlink_href.starts_with("#")) {
             node.path_id = attr.xlink_href.substr(1, attr.xlink_href.length() - 1);

@@ -17,6 +17,7 @@ namespace az::tex::mathjax::impl {
                 stroke_width, stroke, style,
                 transform, view_box, width, height, x, y, d,
                 x1, y1, x2, y2,
+                data_frame,
                 xlink_href, xmlns_xlink, xmlns;
     };
     struct NodeMeta {

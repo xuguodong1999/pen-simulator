@@ -145,9 +145,9 @@ static void resize_keep_ratio(
     double w2 = dst_size.height * (src.cols / (double) src.rows);
     cv::Scalar pad_color = src.at<cv::Vec4d>(0, 0);
     if (h1 <= dst_size.height) {
-        cv::resize(src, dst, cv::Size(dst_size.width, std::ceil(h1)), 0, 0, cv::INTER_NEAREST);
+        cv::resize(src, dst, cv::Size(dst_size.width, std::ceil(h1)), 0, 0, cv::INTER_CUBIC);
     } else {
-        cv::resize(src, dst, cv::Size(std::ceil(w2), dst_size.height), 0, 0, cv::INTER_NEAREST);
+        cv::resize(src, dst, cv::Size(std::ceil(w2), dst_size.height), 0, 0, cv::INTER_CUBIC);
     }
     int top = (dst_size.height - dst.rows) / 2;
     int down = (dst_size.height - dst.rows + 1) / 2;

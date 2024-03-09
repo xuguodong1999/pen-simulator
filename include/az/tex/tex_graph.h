@@ -31,6 +31,7 @@ namespace az::tex::mathjax {
         Box2 view_box;
         ScalarType font_size, width, height, x, y, x1, y1, x2, y2;
         std::string path_id;
+        bool data_frame;
         az::svg::Path *path = nullptr;
     };
 

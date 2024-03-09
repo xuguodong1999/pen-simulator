@@ -94,6 +94,9 @@ Vec2 PenGraph::adjust_size_for_rendering(
         const ScalarType &max_render_size,
         const ScalarType &padding_ratio
 ) {
+    if (this->data.empty()) {
+        return {0, 0};
+    }
     std::vector<float> size_list;
     size_list.reserve(this->data.size() * 2);
     for (auto &item: this->data) {

@@ -3,6 +3,10 @@ import path from "path";
 import os from "os";
 import {Wrapper} from "@xgd/mathjax-json";
 
+const MIN_SVG_LEN = String.raw`
+<svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16" xmlns:xlink="http://www.w3.org/1999/xlink"><defs></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"></g></g></svg>
+`.length;
+
 function cleanIm2Latex() {
     const root = path.resolve(os.homedir(), 'datasets/im2latex/raw');
     const lines = fs.readFileSync(
@@ -34,7 +38,10 @@ function cleanIm2Latex() {
         }
         const svg = Wrapper.texToSvg(latex);
         total += 1;
-        if (-1 !== svg.indexOf('red') || -1 !== svg.indexOf('black')) {
+        if (svg.length < MIN_SVG_LEN
+            || svg.length < MIN_SVG_LEN + latex.length * 10
+            || -1 !== svg.indexOf('red')
+            || -1 !== svg.indexOf('black')) {
             error += 1;
             invalidItems.push(latex);
             i = originStart + 1;
@@ -47,10 +54,10 @@ function cleanIm2Latex() {
         }
     }
     console.log(`${total}: error rate = ${error / total}`);
-    // fs.writeFileSync(path.join(root, 'im2latex_formulas.lst.json'), JSON.stringify({
-    //     "valid": validItems,
-    //     "invalid": invalidItems,
-    // }));
+    fs.writeFileSync(path.join(root, 'im2latex_formulas.lst.json'), JSON.stringify({
+        "valid": validItems,
+        "invalid": invalidItems,
+    }));
     // raw: 0.015242718446601942
     // line append: 0.015223127555310696
 }

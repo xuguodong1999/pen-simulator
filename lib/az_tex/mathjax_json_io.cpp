@@ -48,6 +48,7 @@ namespace az::tex::mathjax::impl {
         TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, class_, class)
         TRY_SERIALIZE_MEMBER_AR_BEAN(d)
         TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, data_c, data-c)
+        TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, data_frame, data-frame)
         TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, data_mjx_texclass, data-mjx-texclass)
         TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, data_mml_node, data-mml-node)
         TRY_SERIALIZE_MEMBER_BY_NAME(ar, bean, data_mml_text, data-mml-text)

@@ -101,8 +101,8 @@ static void sort_by_multiply_demonstration(
         return {0, 0};
     };
     std::sort(target.begin(), target.end(), [&](const auto &a, const auto &b) {
-        auto [a0, a1] = get_node_priority(a);
-        auto [b0, b1] = get_node_priority(b);
+        auto[a0, a1] = get_node_priority(a);
+        auto[b0, b1] = get_node_priority(b);
         if (a0 != b0) { return a0 < b0; }
         return a1 < b1;
     });
@@ -169,8 +169,8 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
             Box2 orig_box{from, to};
             auto offset = get_distance(from, to) * ScalarType{0.01};
             offset = std::clamp(offset, ScalarType{4}, ScalarType{30});
-            auto [tl, bl] = move_line_vertically(from, to, offset);
-            auto [tr, br] = move_line_vertically(from, to, -offset);
+            auto[tl, bl] = move_line_vertically(from, to, offset);
+            auto[tr, br] = move_line_vertically(from, to, -offset);
             orig_box.extend(tl);
             orig_box.extend(br);
             Transform2 trans;
@@ -286,9 +286,11 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
         }
         return hw_char;
     };
-    const auto on_hw_draw_node = [&](const NodeProps &node, const Box2 &box) -> std::shared_ptr<PenChar> {
+    const auto on_hw_draw_node = [&](const NodeProps &node, const Box2 &box) -> std::shared_ptr<PenOp> {
         if (node.label.empty()) {
-            if ("rect" == node.svg_type || "line" == node.svg_type) { // handle frac
+            if (node.data_frame && "rect" == node.svg_type) {
+                return nullptr; // fall back to svg
+            } else if ("rect" == node.svg_type || "line" == node.svg_type) { // handle frac
                 return on_hw_draw_char(node, "-", box, false);
             } else if ("text" == node.svg_type) { // handle plain text
                 Transform2 trans;
@@ -303,18 +305,55 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
         return on_hw_draw_char(node, label, box);
     };
     const auto on_svg_draw_node = [&](const NodeProps &node, const Box2 &box) -> std::shared_ptr<PenOp> {
-        if ("rect" == node.svg_type || "line" == node.svg_type) { // handle frac
+        if (node.data_frame && "rect" == node.svg_type) {
+            auto pen_rect = std::make_shared<PenGraph>();
+            std::array<Vec2, 4> points = {
+                    box.corner(Box2::TopLeft),
+                    box.corner(Box2::TopRight),
+                    box.corner(Box2::BottomRight),
+                    box.corner(Box2::BottomLeft),
+            };
+            for (size_t i = 0; i < points.size(); i++) {
+                auto &from = points[i];
+                auto &to = points[(i + 1) % points.size()];
+                auto offset = get_distance(from, to) * ScalarType{0.01};
+                offset = std::clamp(offset, ScalarType{4}, ScalarType{30});
+                auto[tl, bl] = move_line_vertically(from, to, offset);
+                auto[tr, br] = move_line_vertically(from, to, -offset);
+                auto pen_line = std::make_shared<PenPath>(fmt::format(
+                        "M{} {}L{} {}L{} {}L{} {}Z",
+                        tl.x(), tl.y(),
+                        tr.x(), tr.y(),
+                        br.x(), br.y(),
+                        bl.x(), bl.y()
+                ));
+                pen_rect->data.push_back(pen_line);
+            }
+            pen_rect->move_center_to(box.center());
+            if (need_extra_info) {
+                node_extra_map[&node]->origin_label = "□";
+            }
+            return pen_rect;
+        } else if ("rect" == node.svg_type || "line" == node.svg_type) { // handle frac
 #ifdef XGD_DEBUG
             SPDLOG_INFO("on_svg_draw_node: rect");
 #endif
-            auto pen_path = std::make_shared<PenPath>("M0 0L1 0L1 1L0 1L0 0"); // mock a rect-like path
-            auto size = box.sizes();
-            pen_path->fit_into(size.x(), size.y());
-            pen_path->move_center_to(box.center());
+            auto tl = box.corner(Box2::TopLeft);
+            auto tr = box.corner(Box2::TopRight);
+            auto bl = box.corner(Box2::BottomLeft);
+            auto br = box.corner(Box2::BottomRight);
+            auto pen_line = std::make_shared<PenPath>(fmt::format(
+                    "M{} {}L{} {}L{} {}L{} {}Z",
+                    tl.x(), tl.y(),
+                    tr.x(), tr.y(),
+                    br.x(), br.y(),
+                    bl.x(), bl.y()
+            ));
+            pen_line->move_center_to(box.center());
             if (need_extra_info) {
                 node_extra_map[&node]->origin_label = "-";
             }
-            return pen_path;
+            return pen_line;
         } else if ("text" == node.svg_type && !node.text.empty()) { // handle svg text
             if (need_extra_info) {
                 node_extra_map[&node]->origin_label = node.text;
