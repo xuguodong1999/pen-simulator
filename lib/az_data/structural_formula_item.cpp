@@ -86,9 +86,15 @@ void StructuralFormulaItem::create_from_format(
     mol_graph->traverse([&](const Atom &atom) {
         if (6 == atom.atomic_number && !force_show_carbon && mol_graph->atom_count() > 1) { return; }
         auto &display_text = ELEMENTS[atom.atomic_number];
-        auto pen_atom = SynthesisTexGenerator::generate_sub_string(display_text, shape_provider);
+        auto pen_atom = SynthesisTexGenerator::generate_sub_string(fmt::format(
+                "\\ce{{ {}{}{}{} }}", // Fe2+
+                display_text,
+                atom.charge == 0 ? "" : "^",
+                std::abs(atom.charge) <= 1 ? "" : std::to_string(std::abs(atom.charge)),
+                atom.charge == 0 ? "" : (atom.charge > 0 ? "+" : "-")
+        ), shape_provider);
         ScalarType size = bond_mean * TEXT_RATIO * 2;
-        pen_atom->fit_into_keep_ratio(size, size);
+        pen_atom->fit_into_keep_ratio(1024 * size, size);
         pen_atom->move_center_to(atom.center_2d);
         auto info = std::make_shared<PenItemInfo>();
         info->origin_label = display_text;

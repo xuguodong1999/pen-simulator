@@ -25,7 +25,7 @@ using namespace az;
 using namespace az::pen;
 
 //#define USE_ARGB
-#define RENDER_FRAMES
+//#define RENDER_FRAMES
 
 static SkBitmap create_bitmap(const int &w, const int &h) {
     SkBitmap bitmap;
@@ -135,7 +135,7 @@ static void render_with_skia(
     data->set_context(nullptr);
 }
 
-static void resize_keep_ratio(
+static void opencv_resize(
         cv::Mat &dst,
         const cv::Mat &src,
         const cv::Size &dst_size
@@ -154,6 +154,38 @@ static void resize_keep_ratio(
     int left = (dst_size.width - dst.cols) / 2;
     int right = (dst_size.width - dst.cols + 1) / 2;
     cv::copyMakeBorder(dst, dst, top, down, left, right, cv::BORDER_CONSTANT, pad_color);
+}
+
+static void skia_resize(SkCanvas &canvas, const SkBitmap &bitmap, int image_width, int image_height) {
+    canvas.drawColor(BACKGROUND_COLOR);
+
+    auto kx = static_cast<SkScalar>(image_width) / bitmap.width();
+    auto ky = static_cast<SkScalar>(image_height) / bitmap.height();
+    auto k = static_cast<SkScalar>((std::min)(kx, ky));
+
+    if (kx < ky) {
+        auto dy = static_cast<SkScalar>(image_height - bitmap.height() * k) / 2;
+        canvas.translate(0, dy);
+    } else {
+        auto dx = static_cast<SkScalar>(image_width - bitmap.width() * k) / 2;
+        canvas.translate(dx, 0);
+    }
+    canvas.scale(k, k);
+
+//        canvas.writePixels(bitmap, 0, 0); // scale not work, use image instead
+//        auto image = SkImages::RasterFromBitmap(bitmap); // always mutable, buffer copy leads to low performance
+    auto image = SkImages::RasterFromData(
+            SkImageInfo::Make(
+                    bitmap.width(), bitmap.height(),
+                    bitmap.colorType(), bitmap.alphaType()
+            ),
+            SkData::MakeWithoutCopy(
+                    bitmap.getPixels(), bitmap.computeByteSize()
+            ),
+            bitmap.rowBytes()
+    ); // comments said the pixels data will *not* be copied, just trust it.
+    canvas.drawImage(image, 0, 0);
+    canvas.resetMatrix();
 }
 
 void display_in_opencv_highgui(
@@ -176,7 +208,7 @@ void display_in_opencv_highgui(
 #else
             cv::Mat frame(cv::Size{bitmap.width(), bitmap.height()}, CV_8UC1, bitmap.getPixels());
 #endif
-            resize_keep_ratio(frame, frame, cv::Size{win_width, win_height});
+            opencv_resize(frame, frame, cv::Size{win_width, win_height});
 #ifdef USE_ARGB
             cv::cvtColor(frame, frame, cv::COLOR_RGBA2BGRA);
 #endif
@@ -210,7 +242,7 @@ void display_in_opencv_highgui(
 #else
     // fast check correctness manually
     render_looper(false);
-    cv::waitKey(2000);
+    cv::waitKey(0);
 #endif
 }
 
@@ -241,37 +273,9 @@ void save_frames(
     SkPaint copy_paint = create_paint(SCRIPT_COLOR, stroke_width);
     auto copy_bitmap = create_bitmap(image_width, image_height);
     SkCanvas canvas(copy_bitmap);
-
+#ifdef RENDER_FRAMES
     render_with_skia(data, w, h, stroke_width, [&](const SkBitmap &bitmap, std::string_view action) {
-        canvas.drawColor(BACKGROUND_COLOR);
-
-        auto kx = static_cast<SkScalar>(image_width) / bitmap.width();
-        auto ky = static_cast<SkScalar>(image_height) / bitmap.height();
-        auto k = static_cast<SkScalar>((std::min)(kx, ky));
-
-        if (kx < ky) {
-            auto dy = static_cast<SkScalar>(image_height - bitmap.height() * k) / 2;
-            canvas.translate(0, dy);
-        } else {
-            auto dx = static_cast<SkScalar>(image_width - bitmap.width() * k) / 2;
-            canvas.translate(dx, 0);
-        }
-        canvas.scale(k, k);
-
-//        canvas.writePixels(bitmap, 0, 0); // scale not work, use image instead
-//        auto image = SkImages::RasterFromBitmap(bitmap); // always mutable, buffer copy leads to low performance
-        auto image = SkImages::RasterFromData(
-                SkImageInfo::Make(
-                        bitmap.width(), bitmap.height(),
-                        bitmap.colorType(), bitmap.alphaType()
-                ),
-                SkData::MakeWithoutCopy(
-                        bitmap.getPixels(), bitmap.computeByteSize()
-                ),
-                bitmap.rowBytes()
-        ); // comments said the pixels data will *not* be copied, just trust it.
-        canvas.drawImage(image, 0, 0);
-        canvas.resetMatrix();
+        skia_resize(canvas, bitmap, image_width, image_height);
         std::string file_name = fmt::format("{}{}_{:08d}.png", path, image_prefix, frame_idx);
         SPDLOG_INFO("save to: {}", file_name);
         SkFILEWStream out(file_name.c_str());
@@ -284,4 +288,19 @@ void save_frames(
             frame_idx++;
         }
     });
+#else
+    render_with_skia(data, w, h, stroke_width, [&](const SkBitmap &bitmap, std::string_view action) {
+        if ("bitmap" != action) { return; }
+        skia_resize(canvas, bitmap, image_width, image_height);
+        std::string file_name = fmt::format("{}{}_{:08d}.png", path, image_prefix, frame_idx);
+        SPDLOG_INFO("save to: {}", file_name);
+        SkFILEWStream out(file_name.c_str());
+        SkPngEncoder::Options opt;
+        opt.fZLibLevel = 9;
+        bool res = SkPngEncoder::Encode(&out, copy_bitmap.pixmap(), opt);
+        if (!res) {
+            SPDLOG_INFO("SkPngEncoder::Encode:{}", res);
+        }
+    });
+#endif
 }

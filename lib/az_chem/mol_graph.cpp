@@ -29,6 +29,7 @@ void MolGraph::traverse(
 
 void MolGraph::from_format(std::string_view input, std::string_view format) {
     from_format < RDKitBackend > (input, format);
+//    from_format < OpenbabelBackend > (input, format);
 }
 
 std::string MolGraph::to_format(std::string_view format) const {

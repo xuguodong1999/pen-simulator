@@ -192,6 +192,7 @@ Usage)", 120);
                     STROKE_WIDTH,
                     content,
                     720, 480
+//                    1720, 720
             );
         } else {
             save_frames(

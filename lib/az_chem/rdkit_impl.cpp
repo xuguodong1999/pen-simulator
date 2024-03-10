@@ -188,31 +188,66 @@ static void sync_to_rd_mol(
             default:
                 throw std::runtime_error(fmt::format("unhandled bond type: {}", (uint8_t) b.type));
         }
-        mol.addBond(id_to_atom_map[b.from->id], id_to_atom_map[b.to->id], rd_bond_type);
+        auto from_it = id_to_atom_map.find(b.from->id);
+        auto to_it = id_to_atom_map.find(b.to->id);
+        if (id_to_atom_map.end() == from_it || id_to_atom_map.end() == to_it) {
+            SPDLOG_ERROR("missing bond atoms");
+            return;
+        }
+        try {
+            mol.addBond(from_it->second, to_it->second, rd_bond_type);
+        } catch (std::exception &e) {
+            SPDLOG_ERROR(e.what());
+        }
         auto rd_bond = mol.getBondBetweenAtoms(
-                id_to_atom_map[b.from->id]->getIdx(),
-                id_to_atom_map[b.to->id]->getIdx()
+                from_it->second->getIdx(),
+                to_it->second->getIdx()
         );
+        if (!rd_bond) {
+            SPDLOG_ERROR("mol.getBondBetweenAtoms == nullptr");
+            return;
+        }
         rd_bond->setBondDir(rd_bond_dir);
         rd_bond->setStereo(rd_bond_stereo);
     });
     g.bfs_traverse([&](const Atom &a) {
     }, [&](const Bond &b) {
         if (2 != b.stereo_atoms.size()) { return; }
+        auto from_it = id_to_atom_map.find(b.from->id);
+        auto to_it = id_to_atom_map.find(b.to->id);
+        if (id_to_atom_map.end() == from_it || id_to_atom_map.end() == to_it) {
+            SPDLOG_ERROR("missing bond atoms");
+            return;
+        }
         auto rd_bond = mol.getBondBetweenAtoms(
-                id_to_atom_map[b.from->id]->getIdx(),
-                id_to_atom_map[b.to->id]->getIdx()
+                from_it->second->getIdx(),
+                to_it->second->getIdx()
         );
+        if (!rd_bond) {
+            SPDLOG_ERROR("mol.getBondBetweenAtoms == nullptr");
+            return;
+        }
+        auto s0_it = id_to_atom_map.find(b.stereo_atoms[0]->id);
+        auto s1_it = id_to_atom_map.find(b.stereo_atoms[1]->id);
+        if (id_to_atom_map.end() == s0_it || id_to_atom_map.end() == s1_it) {
+            SPDLOG_ERROR("missing stereo atoms");
+            return;
+        }
         rd_bond->setStereoAtoms(
-                id_to_atom_map[b.stereo_atoms[0]->id]->getIdx(),
-                id_to_atom_map[b.stereo_atoms[1]->id]->getIdx()
+                s0_it->second->getIdx(),
+                s1_it->second->getIdx()
         );
     });
     RDKit::MolOps::sanitizeMol(mol);
     RDDepict::compute2DCoords(mol);
-    RDKit::MolOps::detectBondStereochemistry(mol);
-    RDKit::MolOps::assignChiralTypesFromBondDirs(mol);
+    try {
+        RDKit::MolOps::detectBondStereochemistry(mol);
+        RDKit::MolOps::assignChiralTypesFromBondDirs(mol);
+    } catch (std::exception &e) {
+        SPDLOG_ERROR(e.what());
+    }
     RDKit::MolOps::assignStereochemistry(mol);
+
 //    mol.debugMol(std::cout);
 }
 

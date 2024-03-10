@@ -18,16 +18,12 @@ namespace az::chem::impl {
     struct GraphImpl : boost::adjacency_list<
             boost::vecS,
             boost::vecS,
-            boost::directedS,
+            boost::undirectedS,
             Atom,
             Bond,
             GraphProps,
             boost::listS> {
         void bfs_traverse(
-                const std::function<void(const Atom &)> &on_discover_node,
-                const std::function<void(const Bond &)> &on_edge) const;
-
-        void dfs_traverse(
                 const std::function<void(const Atom &)> &on_discover_node,
                 const std::function<void(const Bond &)> &on_edge) const;
     };
