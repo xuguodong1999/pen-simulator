@@ -2,6 +2,10 @@
 
 PEN-SIMULATOR is a handwriting / svg synthesis system built for simulation of pen-based interaction in AI research. It converts many text representations, such as latex of mathematical expression or smiles of chemical structural formula, into sketching trajectories or vectorized elements.
 
+
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/f4557d10-5a0f-4102-a652-4b6ae2f96842
+
+
 ## Feature Overview
 
 - Adaptation of 2D typesetting library
@@ -22,8 +26,20 @@ PEN-SIMULATOR is a handwriting / svg synthesis system built for simulation of pe
 ## More Samples
 
 * Mathematical expressions from im2latex.
+
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/600f2dda-f59f-455a-a984-f1d7728c92c5
+
+
 * Structural formulas from drugbank.
+
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/3de121c6-1804-47d6-b1a8-563a5ad189ba
+
+
 * Draft playground of decimal multiplication
+
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/498cf981-d5cc-40dc-9165-755c60dcea5a
+
+
 * Draft playground of alkane isomer generation
 
 Visualization utilities:
