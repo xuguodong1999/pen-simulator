@@ -19,16 +19,12 @@ PEN-SIMULATOR is a handwriting / svg synthesis system built for simulation of pe
     1. [MathJax embedded SVG Fonts](https://github.com/mathjax/MathJax-src/tree/3.2.2/ts/output/svg/fonts/tex)
     2. [makemeahanzi Chinese Fonts](https://github.com/skishore/makemeahanzi)
 
-- Draft playground
-
-    1. decimal multiplication
-    2. alkane isomer generation
-
 ## More Samples
 
 * Mathematical expressions from im2latex.
 * Structural formulas from drugbank.
-* Chinese documents.
+* Draft playground of decimal multiplication
+* Draft playground of alkane isomer generation
 
 Visualization utilities:
 - Skia (C++, full support): [az-data-cli](./apps/az_data_cli/).
