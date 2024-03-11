@@ -3,7 +3,7 @@
 PEN-SIMULATOR is a handwriting / svg synthesis system built for simulation of pen-based interaction in AI research. It converts many text representations, such as latex of mathematical expression or smiles of chemical structural formula, into sketching trajectories or vectorized elements.
 
 
-https://github.com/xuguodong1999/pen-simulator/assets/40680607/f4557d10-5a0f-4102-a652-4b6ae2f96842
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/e7c58c58-8c60-47db-81b3-b57d50a56b4a
 
 
 ## Feature Overview
@@ -27,7 +27,7 @@ https://github.com/xuguodong1999/pen-simulator/assets/40680607/f4557d10-5a0f-410
 
 * Mathematical expressions from im2latex.
 
-https://github.com/xuguodong1999/pen-simulator/assets/40680607/600f2dda-f59f-455a-a984-f1d7728c92c5
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/a529ddf4-d7c3-4257-9993-1d77683e27b4
 
 
 * Structural formulas from drugbank.
@@ -37,20 +37,19 @@ https://github.com/xuguodong1999/pen-simulator/assets/40680607/3de121c6-1804-47d
 
 * Draft playground of decimal multiplication
 
-https://github.com/xuguodong1999/pen-simulator/assets/40680607/498cf981-d5cc-40dc-9165-755c60dcea5a
+https://github.com/xuguodong1999/pen-simulator/assets/40680607/d4fb422e-6b16-4453-867a-a28e8c117194
 
 
 * Draft playground of alkane isomer generation
+
+## API Usage
+
+PEN-SIMULATOR is written in C++ and has Python bindings.
 
 Visualization utilities:
 - Skia (C++, full support): [az-data-cli](./apps/az_data_cli/).
 - matplotlib (Py, missing rotated system font support): [visualize_mpl.py](./python/pen_simulator/examples/visualize_mpl.py)
 - OpenCV (Py, missing svg path and system font support): [visualize_cv2.py](./python/pen_simulator/examples/visualize_cv2.py)
-
-
-## API Usage
-
-(PEN-SIMULATOR is written in C++ and has Python bindings)
 
 Python
 
