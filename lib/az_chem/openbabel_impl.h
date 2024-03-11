@@ -14,4 +14,10 @@ namespace az::chem::impl::openbabel {
     void generate_2d_coords(GraphImpl &g);
 
     void generate_3d_coords(GraphImpl &g);
+
+    std::string convert_format(
+            const std::string_view &from_content,
+            const std::string_view &from_format,
+            const std::string_view &to_format
+    );
 }

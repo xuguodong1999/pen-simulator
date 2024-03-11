@@ -1,5 +1,4 @@
 #include "openbabel_impl.h"
-#include "az/spdstream.h"
 
 #include <openbabel/atom.h>
 #include <openbabel/bond.h>
@@ -26,16 +25,6 @@ using id_to_atom_map_type = std::unordered_map<IdType, OpenBabel::OBAtom *>;
 using id_to_bond_map_type = std::unordered_map<IdType, OpenBabel::OBBond *>;
 
 //#define XGD_DEBUG
-
-#define OB_LOG_BEGIN \
-    OpenBabel::obErrorLog.SetOutputLevel(OpenBabel::obError);  \
-    az::SpdStream spdlog_out{az::SpdStreamTag::CERR}; \
-    OpenBabel::obErrorLog.SetOutputStream(&spdlog_out);
-
-#define OB_LOG_END \
-    std::endl(spdlog_out); \
-    OpenBabel::obErrorLog.SetOutputLevel(OpenBabel::obWarning); \
-    OpenBabel::obErrorLog.SetOutputStream(&std::clog);
 
 static void openbabel_generate_3d_coords(OpenBabel::OBMol &mol) {
     auto op = OpenBabel::OBOp::FindType("gen3D");
@@ -275,26 +264,21 @@ static void sync_to_ob_mol(
 
 void az::chem::impl::openbabel::generate_graph(
         GraphImpl &g, std::string_view content, const std::string_view &format) {
-    OB_LOG_BEGIN
     OpenBabel::OBMol mol;
     openbabel_read_format(mol, content.data(), format.data());
 //    debug_openbabel_stereo(mol);
     sync_from_ob_mol(g, mol);
-    OB_LOG_END
 }
 
 std::string az::chem::impl::openbabel::to_format(GraphImpl &g, const std::string_view &format) {
-    OB_LOG_BEGIN
     OpenBabel::OBMol mol;
     id_to_atom_map_type id_to_atom_map;
     sync_to_ob_mol(g, mol, id_to_atom_map);
     auto out = openbabel_write_format(mol, format.data());
-    OB_LOG_END
     return out;
 }
 
 void az::chem::impl::openbabel::generate_2d_coords(GraphImpl &g) {
-    OB_LOG_BEGIN
     OpenBabel::OBMol mol;
     id_to_atom_map_type id_to_atom_map;
     sync_to_ob_mol(g, mol, id_to_atom_map);
@@ -307,11 +291,9 @@ void az::chem::impl::openbabel::generate_2d_coords(GraphImpl &g) {
         };
     }, [&](const Bond &b) {
     });
-    OB_LOG_END
 }
 
 void az::chem::impl::openbabel::generate_3d_coords(GraphImpl &g) {
-    OB_LOG_BEGIN
     OpenBabel::OBMol mol;
     id_to_atom_map_type id_to_atom_map;
     sync_to_ob_mol(g, mol, id_to_atom_map);
@@ -325,5 +307,21 @@ void az::chem::impl::openbabel::generate_3d_coords(GraphImpl &g) {
         };
     }, [&](const Bond &b) {
     });
-    OB_LOG_END
+}
+
+std::string az::chem::impl::openbabel::convert_format(
+        const std::string_view &from_content,
+        const std::string_view &from_format,
+        const std::string_view &to_format
+) {
+    auto ob_format_in = OpenBabel::OBConversion::FindFormat(from_format.data());
+    auto ob_format_out = OpenBabel::OBConversion::FindFormat(to_format.data());
+    OpenBabel::OBConversion conv;
+    if (!ob_format_in || !ob_format_out || !conv.SetInAndOutFormats(ob_format_in, ob_format_out)) {
+        throw std::runtime_error(fmt::format("openbabel: failed to find format {} && {}", from_format, to_format));
+    }
+    std::istringstream in(from_content.data());
+    std::ostringstream out;
+    conv.Convert(&in, &out);
+    return out.str();
 }

@@ -16,5 +16,6 @@ xgd_link_libraries(${PROJECT_NAME}
         spdlog
         boost_locale
         boost_property_tree
+        boost_iostreams
         opencv_imgproc
 )

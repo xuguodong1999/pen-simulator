@@ -101,6 +101,8 @@ namespace az {
 
     AZCORE_EXPORT std::vector<fs::path> scan_files_by_ext(const fs::path &path, const char *ext);
 
+    AZCORE_EXPORT void istream_read_all(std::string &buffer, std::istream &ism);
+
     template<typename T>
     T &random_select(std::vector<T> &bucket) {
         std::mt19937 rng(get_random_device()());

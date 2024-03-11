@@ -10,7 +10,6 @@ xgd_link_libraries(
         PRIVATE
         boost_graph
         spdlog
-        AzSpdStream
         openbabel
         coordgen
         rdkit_GraphMol

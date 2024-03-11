@@ -14,6 +14,14 @@ std::vector<fs::path> az::scan_files_by_ext(const fs::path &path, const char *ex
     return files;
 }
 
+void az::istream_read_all(std::string &buffer, std::istream &in) {
+    in.seekg(0, std::ios::beg);
+    std::streamsize size = in.tellg();
+    using It = std::istreambuf_iterator<char>;
+    buffer.reserve(size);
+    buffer.insert(buffer.begin(), It(in), It());
+}
+
 std::random_device &az::get_random_device() {
     static std::random_device dev;
     return dev;
