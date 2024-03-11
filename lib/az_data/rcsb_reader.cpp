@@ -42,7 +42,7 @@ static void read_gz_batched(
         istream_read_all(gzipped_buffer, file);
         std::string buffer;
         gunzip(buffer, gzipped_buffer);
-        on_content(buffer);
+        on_content(file_info, buffer);
     });
     const auto beg = std::chrono::high_resolution_clock::now();
     tf::Executor(thread_num).run(taskflow).get();
