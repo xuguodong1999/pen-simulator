@@ -6,6 +6,7 @@ const config = mergeBIntoAByKey(base, {
     config: {
         options: [
             'CMAKE_OSX_ARCHITECTURES="arm64"',
+            'PYTHON_EXECUTABLE=/Users/xgd/miniforge3/envs/nn/bin/python',
         ]
     },
     test: {

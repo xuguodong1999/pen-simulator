@@ -5,8 +5,8 @@ import {EnvEmccKey, EnvKey} from '../ts-cmake/env';
 
 
 const QT_ROOT = path.resolve(os.homedir(), 'shared/Qt/6.5.3/wasm_32');
-const EMSDK = path.resolve('/opt/homebrew/Cellar/emscripten/3.1.51/libexec');
-const EMSDK_NODE = path.resolve('/opt/homebrew/opt/node@18/bin/node');
+const EMSDK = path.resolve('/opt/homebrew/Cellar/emscripten/3.1.55/libexec');
+const EMSDK_NODE = path.resolve('/opt/homebrew/opt/node@20/bin/node');
 const EMSDK_PYTHON = 'python3';
 const LLVM_INSTALL_DIR = path.resolve(EMSDK, 'llvm');
 const CLANG_BIN_DIR = path.resolve(LLVM_INSTALL_DIR, 'bin');

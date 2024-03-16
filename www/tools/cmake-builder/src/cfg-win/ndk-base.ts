@@ -6,7 +6,7 @@ import {CMAKE_BIN_DIR, GCC_HOST_ROOT, NINJA_BIN_DIR, QT_HOST_ROOT} from './env';
 
 const ANDROID_PLATFORM = '24';
 const ANDROID_ABI = 'arm64-v8a';
-const NDK_VERSION = '26.1.10909125';
+const NDK_VERSION = '26.2.11394342';
 const ANDROID_HOME = path.resolve(os.homedir(), 'AppData/Local/Android/Sdk');
 const ANDROID_NDK = path.resolve(ANDROID_HOME, 'ndk', NDK_VERSION);
 

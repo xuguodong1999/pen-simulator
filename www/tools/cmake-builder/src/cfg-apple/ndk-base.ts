@@ -5,7 +5,7 @@ import {AndroidEnvKey, EnvKey} from '../ts-cmake/env';
 
 const ANDROID_PLATFORM = '24';
 const ANDROID_ABI = 'arm64-v8a';
-const NDK_VERSION = '26.1.10909125';
+const NDK_VERSION = '26.2.11394342';
 const ANDROID_HOME = path.resolve(os.homedir(), 'Library/Android/Sdk');
 const ANDROID_NDK = path.resolve(ANDROID_HOME, 'ndk', NDK_VERSION);
 
@@ -65,10 +65,10 @@ const config: ICMakeBuildConfig = {
         options: ['--config Release'],
         targets: [
             'all',
-            'HelloQmlCanvas_make_apk',
-            'HelloQml_make_apk',
-            'COCR_make_apk',
-            'AzOpenPixGUI_make_apk'
+            // 'HelloQmlCanvas_make_apk',
+            // 'HelloQml_make_apk',
+            // 'COCR_make_apk',
+            // 'AzOpenPixGUI_make_apk'
         ],
     },
 };
