@@ -5,6 +5,7 @@ function(xgd_build_third_party)
             boost
             cairo coordgen cpufeatures
             eigen
+            flatbuffers
             freesasa freetype
             gtest
             inchi
