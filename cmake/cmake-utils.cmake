@@ -77,8 +77,12 @@ macro(xgd_external_find_package)
                 if (ANDROID_NDK AND NOT Vulkan_shaderc_combined_LIBRARY)
                     set(_XGD_ANDROID_SHADERC_SOURCE_DIR ${ANDROID_NDK}/sources/third_party/shaderc)
                     find_library(Vulkan_shaderc_combined_LIBRARY
-                            HINTS ${_XGD_ANDROID_SHADERC_SOURCE_DIR}/libs/${ANDROID_STL}/${ANDROID_ABI}
+                            PATHS ${_XGD_ANDROID_SHADERC_SOURCE_DIR}/libs/${ANDROID_STL}/${ANDROID_ABI}
                             NAMES libshaderc.a
+                            NO_CMAKE_PATH
+                            NO_CMAKE_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH
+                            NO_CMAKE_FIND_ROOT_PATH
                             QUIET)
                     set(Vulkan_ANDROID_INCLUDE_DIR ${_XGD_ANDROID_SHADERC_SOURCE_DIR}/third_party
                             ${_XGD_ANDROID_SHADERC_SOURCE_DIR}/third_party/glslang
