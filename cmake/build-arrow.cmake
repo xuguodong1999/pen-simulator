@@ -71,7 +71,6 @@ xgd_add_library(
         "^(.*)neon(.*)\\.cc"
 
         "^(.*)bz2(.*)\\.cc"
-        "^(.*)snappy(.*)\\.cc"
         "^(.*)lz4(.*)\\.cc"
         "^(.*)brotli(.*)\\.cc"
 
@@ -85,6 +84,13 @@ xgd_add_library(
         INCLUDE_DIRS ${INC_DIR} ${GEN_DIR}
 )
 xgd_generate_export_header(arrow "arrow" ".h")
+target_compile_definitions(
+        arrow
+        PRIVATE
+        ARROW_WITH_SNAPPY
+        ARROW_WITH_ZLIB
+        ARROW_WITH_ZSTD
+)
 if (IOS)
     target_sources(arrow PRIVATE ${SRC_DIR}/arrow/vendored/datetime/ios.mm)
 endif ()
@@ -94,6 +100,7 @@ xgd_link_libraries(
         PRIVATE
         zlib
         zstd
+        snappy
         boost_multiprecision
         boost_crc
         boost_filesystem

@@ -16,6 +16,7 @@ function(xgd_build_third_party)
             quickjs
             rapidjson rdkit ringdecomposerlib
             skia
+            snappy
             spdlog svgpp
             taskflow tinyxml2
             thrift
