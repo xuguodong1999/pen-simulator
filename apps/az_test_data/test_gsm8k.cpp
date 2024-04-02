@@ -4,12 +4,9 @@
 
 #include <gtest/gtest.h>
 
-static void run() {
+TEST(test_data, read_gsm8k) {
     using namespace az;
     using namespace az::data;
-    Gsm8kReader reader;
-}
-
-TEST(test_data, read_gsm8k) {
-    run();
+    GSM8kReader reader;
+    reader.sync_load_all(az::get_dataset_root("huggingface/gsm8k"));
 }
