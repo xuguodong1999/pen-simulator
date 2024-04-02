@@ -11,7 +11,7 @@ function(xgd_build_third_party)
             inchi
             lbfgs libpng libxml2
             maeparser
-            openbabel opencv
+            openbabel opencv openssl
             pixman protobuf
             quickjs
             rapidjson rdkit ringdecomposerlib
