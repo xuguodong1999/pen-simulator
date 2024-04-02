@@ -18,5 +18,6 @@ xgd_link_libraries(${PROJECT_NAME}
         boost_property_tree
         boost_iostreams
         opencv_imgproc
+        arrow
         parquet
 )
