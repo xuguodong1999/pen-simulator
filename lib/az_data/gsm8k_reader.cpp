@@ -25,7 +25,7 @@ std::vector<std::string_view> GSM8kReader::GSM8K_FILES = {
 };
 
 static void convert_chain_thought_to_qa_bean(GSM8kItem &dst, const std::span<std::string_view> &steps) {
-    dst.chain_thought_steps.reserve(steps.size() - 1);
+    dst.chain_thought_steps.reserve(steps.size());
     for (auto &step: steps) {
         std::vector<std::string_view> sections;
         boost::algorithm::split_regex(sections, step, boost::regex(R"(\*\*)"));
@@ -43,7 +43,6 @@ static void convert_chain_thought_to_qa_bean(GSM8kItem &dst, const std::span<std
         } else {
             throw std::runtime_error(fmt::format("unhandled data format: {}", step));
         }
-
         dst.chain_thought_steps.emplace_back(q, a);
     }
 }
