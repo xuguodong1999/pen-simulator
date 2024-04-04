@@ -45,6 +45,8 @@ const config: ICMakeBuildConfig = {
     config: {
         generator: 'Ninja',
         options: [
+            'CMAKE_OSX_DEPLOYMENT_TARGET="16.3"',
+            'XGD_USE_QT=OFF',
             'XGD_USE_TORCH=OFF',
             `CMAKE_TOOLCHAIN_FILE:FILEPATH=${path.resolve(QT_ROOT, 'lib/cmake/Qt6/qt.toolchain.cmake')}`,
             'BUILD_SHARED_LIBS:BOOL=ON',
@@ -54,7 +56,8 @@ const config: ICMakeBuildConfig = {
     build: {
         parallel: true,
         options: ['--config Release'],
-        targets: ['all']
+        targets: ['all'],
+        // targets: ['parquet'],
     },
 };
 export {config};

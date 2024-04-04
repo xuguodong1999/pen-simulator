@@ -46,7 +46,7 @@ const config: ICMakeBuildConfig = {
         generator: 'Ninja',
         options: [
             'XGD_USE_TORCH=OFF',
-            'CMAKE_OSX_DEPLOYMENT_TARGET="11.0"',
+            'CMAKE_OSX_DEPLOYMENT_TARGET="13.3"',
             'BUILD_SHARED_LIBS:BOOL=OFF',
             'XGD_USE_VK:BOOL=OFF',
             'CMAKE_BUILD_TYPE:STRING=Release',
