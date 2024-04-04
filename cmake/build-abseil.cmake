@@ -57,6 +57,10 @@ xgd_add_library(
 if (WIN32)
     target_compile_definitions(absl PRIVATE NOMINMAX)
 elseif (APPLE)
-    find_library(CoreFoundation CoreFoundation REQUIRED)
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
 endif ()
-target_link_libraries(absl PRIVATE $<$<BOOL:${ANDROID}>:log> $<$<PLATFORM_ID:Darwin>:${CoreFoundation}>)
+target_link_libraries(
+        absl PRIVATE
+        $<$<BOOL:${ANDROID}>:log>
+        $<$<PLATFORM_ID:Darwin>:${COREFOUNDATION_LIBRARY}>
+)

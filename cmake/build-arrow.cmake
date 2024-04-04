@@ -93,6 +93,9 @@ target_compile_definitions(
 )
 if (IOS)
     target_sources(arrow PRIVATE ${SRC_DIR}/arrow/vendored/datetime/ios.mm)
+    target_compile_definitions(arrow PRIVATE "TARGET_OS_IPHONE")
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+    target_link_libraries(arrow PRIVATE ${COREFOUNDATION_LIBRARY})
 endif ()
 
 xgd_link_libraries(

@@ -617,12 +617,17 @@ if (XGD_USE_VULKAN)
     xgd_link_vulkan(skia)
 endif ()
 if (APPLE)
-    find_library(CoreFoundation CoreFoundation REQUIRED)
-    find_library(CoreText CoreText REQUIRED)
-    find_library(CoreGraphics CoreGraphics REQUIRED)
-    find_library(ImageIO ImageIO REQUIRED)
-    target_link_libraries(skia PRIVATE
-            "-framework CoreFoundation -framework CoreText -framework CoreGraphics -framework ImageIO")
+    find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
+    find_library(CORETEXT_LIBRARY CoreText REQUIRED)
+    find_library(COREGRAPHICS_LIBRARY CoreGraphics REQUIRED)
+    find_library(IMAGEIO_LIBRARY ImageIO REQUIRED)
+    target_link_libraries(
+            skia PRIVATE
+            ${COREFOUNDATION_LIBRARY}
+            ${CORETEXT_LIBRARY}
+            ${COREGRAPHICS_LIBRARY}
+            ${IMAGEIO_LIBRARY}
+    )
 endif ()
 target_compile_definitions(skia PRIVATE
         SK_CODEC_DECODES_PNG
