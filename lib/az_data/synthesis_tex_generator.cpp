@@ -286,6 +286,14 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
         }
         return hw_char;
     };
+    static const std::unordered_set<LabelType> bracket_set{
+            "(",
+            ")",
+            "[",
+            "]",
+            "{",
+            "}",
+    };
     const auto on_hw_draw_node = [&](const NodeProps &node, const Box2 &box) -> std::shared_ptr<PenOp> {
         if (node.label.empty()) {
             if (node.data_frame && "rect" == node.svg_type) {
@@ -295,14 +303,16 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
             } else if ("text" == node.svg_type) { // handle plain text
                 Transform2 trans;
                 trans.matrix() = id_transform_map[&node];
-                return on_hw_draw_char(node, node.text, box.transformed(trans));
+                bool keep_ratio = !bracket_set.contains(node.text);
+                return on_hw_draw_char(node, node.text, box.transformed(trans), keep_ratio);
             } else if (!node.text.empty()) { // treat composed char as a common path
                 return on_hw_draw_char(node, node.text, box, false);
             }
             return nullptr;
         }
         UCharType label = convert_unicode_hex_to_str(fmt::format("0x{}", node.label));
-        return on_hw_draw_char(node, label, box);
+        bool keep_ratio = !bracket_set.contains(label);
+        return on_hw_draw_char(node, label, box, keep_ratio);
     };
     const auto on_svg_draw_node = [&](const NodeProps &node, const Box2 &box) -> std::shared_ptr<PenOp> {
         if (node.data_frame && "rect" == node.svg_type) {
