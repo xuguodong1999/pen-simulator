@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable
+from typing import Callable, List
 
 import numpy as np
 
@@ -59,7 +59,7 @@ class PenContext:
         """
         ...
 
-    def register_on_hierarchy(self, callback: Callable[[list[str], str], None]):
+    def register_on_hierarchy(self, callback: Callable[[List[str], str], None]):
         """
         (optional) invoke on meeting a new hierarchy, for example, molecule bonds or mathml annotations
         :param callback:
@@ -216,5 +216,40 @@ def generate(
     :param text_type: latex or smiles
     :param traverse_order: may be helpful when demonstrating drafts of multiplication
     :return: :class:`PenOp`
+    """
+    ...
+
+
+def generate_batch(
+        *,
+        texts: List[str],
+        source_type: SourceType,
+        text_type: TextType,
+        traverse_order=TraverseOrder.DEFAULT,
+) -> [PenOp]:
+    """
+    a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
+    :param texts: list of input content
+    :param source_type: svg or handwriting
+    :param text_type: latex or smiles
+    :param traverse_order: may be helpful when demonstrating drafts of multiplication
+    :return: :class:`PenOp`
+    """
+    ...
+
+
+def generate_multiply_draft_latex(a: str, b: str) -> str:
+    """
+     generate latex like:
+           1.2
+      x    3.4
+      ---------
+           4 8
+         3 6
+      ---------
+         4.0 8
+    :param a: string of a number, can be floating point like "1.2"
+    :param b: string of a number, can be floating point like "3.4"
+    :return: a latex string representing draft of a times b
     """
     ...

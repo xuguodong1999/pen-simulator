@@ -1,4 +1,5 @@
 import argparse
+from typing import List
 
 import numpy as np
 
@@ -33,7 +34,7 @@ def ps_generate_example(
     def on_label(origin: str, fallback: str):
         print(f'! on_label {origin} {fallback}')
 
-    def on_hierarchy(hierarchies: list[str], label: str):
+    def on_hierarchy(hierarchies: List[str], label: str):
         print(f'! on_hierarchy {hierarchies} {label}')
 
     pen_context = ps.PenContext()

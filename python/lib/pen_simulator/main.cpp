@@ -4,6 +4,7 @@
 #include "az/data/synthesis_tex_generator.h"
 #include "az/data/couch_reader.h"
 #include "az/data/makemeahanzi_reader.h"
+#include "az/math/multiply_draft.h"
 
 
 #include <pybind11/pybind11.h>
@@ -13,6 +14,8 @@
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
+
+#include <taskflow/taskflow.hpp>
 
 namespace py = pybind11;
 
@@ -99,12 +102,17 @@ PYBIND11_MODULE(pen_simulator, m) {
     m.def("global_init_makemeahanzi", [&](std::string_view path) {
         std::call_once(makemeahanzi_flag, [&]() { svg_reader.sync_load_all(path); });
     });
-
-    m.def("generate", [&](const py::args &args, const py::kwargs &kwargs) {
+    const auto generate_single = [&](
+            const py::args &args,
+            const py::kwargs &kwargs,
+            std::string_view text = ""
+    ) {
         SourceType source_type = SourceType::HANDWRITING;
         TextType text_type = TextType::LATEX;
-        std::string_view text = "error";
-        if (kwargs.contains("text")) { text = kwargs["text"].cast<std::string_view>(); }
+        if (text.empty() && kwargs.contains("text")) { text = kwargs["text"].cast<std::string_view>(); }
+        if (text.empty()) {
+            text = "error";
+        }
         if (kwargs.contains("source_type")) { source_type = kwargs["source_type"].cast<SourceType>(); }
         if (kwargs.contains("text_type")) { text_type = kwargs["text_type"].cast<TextType>(); }
 #ifdef XGD_DEBUG
@@ -146,6 +154,28 @@ PYBIND11_MODULE(pen_simulator, m) {
             throw std::runtime_error("generation failed");
         }
         return pen_op;
+    };
+    m.def("generate", [&](const py::args &args, const py::kwargs &kwargs) {
+        return generate_single(args, kwargs);
     });
+
+    m.def("generate_batch", [&](const py::args &args, const py::kwargs &kwargs) {
+        const auto thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
+        tf::Taskflow taskflow;
+        auto texts = kwargs["texts"].cast<std::vector<std::string>>();
+        PointerVec<PenOp> outputs;
+        outputs.reserve(texts.size());
+        outputs.resize(texts.size());
+        taskflow.for_each_index(size_t{0}, texts.size(), size_t{1}, [&](size_t i) {
+            outputs[i] = generate_single(args, kwargs, texts[i]);
+        });
+        tf::Executor(thread_num).run(taskflow).get();
+        return outputs;
+    });
+
+    m.def("generate_multiply_draft_latex", [](std::string_view a, std::string_view b) {
+        return az::math::MultiplyDraft::generate(a, b);
+    });
+
     m.attr("__version__") = "dev";
 }

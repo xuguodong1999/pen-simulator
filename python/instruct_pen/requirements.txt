@@ -1,0 +1,14 @@
+numpy
+pen-simulator
+torch
+diffusers
+datasets
+accelerate
+peft
+torchvision
+tqdm
+transformers
+matplotlib
+svgpath2mpl
+pillow
+opencv-python
