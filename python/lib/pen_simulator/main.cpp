@@ -102,19 +102,15 @@ PYBIND11_MODULE(pen_simulator, m) {
     m.def("global_init_makemeahanzi", [&](std::string_view path) {
         std::call_once(makemeahanzi_flag, [&]() { svg_reader.sync_load_all(path); });
     });
+    //SourceType source_type = SourceType::HANDWRITING;
+    //        TextType text_type = TextType::LATEX;
+    //        std::string text;
     const auto generate_single = [&](
-            const py::args &args,
-            const py::kwargs &kwargs,
-            std::string_view text = ""
+            std::string_view text,
+            SourceType source_type,
+            TextType text_type,
+            SynthesisTexGenerator::TraverseOrder traverse_order
     ) {
-        SourceType source_type = SourceType::HANDWRITING;
-        TextType text_type = TextType::LATEX;
-        if (text.empty() && kwargs.contains("text")) { text = kwargs["text"].cast<std::string_view>(); }
-        if (text.empty()) {
-            text = "error";
-        }
-        if (kwargs.contains("source_type")) { source_type = kwargs["source_type"].cast<SourceType>(); }
-        if (kwargs.contains("text_type")) { text_type = kwargs["text_type"].cast<TextType>(); }
 #ifdef XGD_DEBUG
         SPDLOG_INFO("text={}", text);
         SPDLOG_INFO("source_type={}", (int32_t) source_type);
@@ -135,13 +131,6 @@ PYBIND11_MODULE(pen_simulator, m) {
             item.create_from_format(shape_provider, text);
             pen_op = item.data;
         } else if (TextType::LATEX == text_type) {
-            auto traverse_order = SynthesisTexGenerator::TraverseOrder::DEFAULT;
-            if (kwargs.contains("traverse_order")) {
-                traverse_order = kwargs["traverse_order"].cast<SynthesisTexGenerator::TraverseOrder>();
-#ifdef XGD_DEBUG
-                SPDLOG_INFO("traverse_order{}", (int32_t) traverse_order);
-#endif
-            }
             pen_op = SynthesisTexGenerator::generate_next(
                     text.data(), shape_provider, [](const UCharType &) {}, force_mathjax, traverse_order);
         } else {
@@ -156,19 +145,40 @@ PYBIND11_MODULE(pen_simulator, m) {
         return pen_op;
     };
     m.def("generate", [&](const py::args &args, const py::kwargs &kwargs) {
-        return generate_single(args, kwargs);
-    });
+        std::string_view text = "error";
+        SourceType source_type = SourceType::HANDWRITING;
+        TextType text_type = TextType::LATEX;
+        auto traverse_order = SynthesisTexGenerator::TraverseOrder::DEFAULT;
 
+        if (kwargs.contains("text")) { text = kwargs["text"].cast<std::string_view>(); }
+        if (kwargs.contains("source_type")) { source_type = kwargs["source_type"].cast<SourceType>(); }
+        if (kwargs.contains("text_type")) { text_type = kwargs["text_type"].cast<TextType>(); }
+        if (kwargs.contains("traverse_order")) {
+            traverse_order = kwargs["traverse_order"].cast<SynthesisTexGenerator::TraverseOrder>();
+        }
+
+        return generate_single(text, source_type, text_type, traverse_order);
+    });
+    // trick: do not pass py::xxx to another thread
     m.def("generate_batch", [&](const py::args &args, const py::kwargs &kwargs) {
-        const auto thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
-        tf::Taskflow taskflow;
-        auto texts = kwargs["texts"].cast<std::vector<std::string>>();
+        SourceType source_type = SourceType::HANDWRITING;
+        TextType text_type = TextType::LATEX;
+        auto traverse_order = SynthesisTexGenerator::TraverseOrder::DEFAULT;
+        if (kwargs.contains("source_type")) { source_type = kwargs["source_type"].cast<SourceType>(); }
+        if (kwargs.contains("text_type")) { text_type = kwargs["text_type"].cast<TextType>(); }
+        if (kwargs.contains("traverse_order")) {
+            traverse_order = kwargs["traverse_order"].cast<SynthesisTexGenerator::TraverseOrder>();
+        }
+        auto texts = kwargs["texts"].cast<std::vector<std::string_view>>();
+
         PointerVec<PenOp> outputs;
         outputs.reserve(texts.size());
         outputs.resize(texts.size());
+        tf::Taskflow taskflow;
         taskflow.for_each_index(size_t{0}, texts.size(), size_t{1}, [&](size_t i) {
-            outputs[i] = generate_single(args, kwargs, texts[i]);
+            outputs[i] = generate_single(texts[i], source_type, text_type, traverse_order);
         });
+        const auto thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
         tf::Executor(thread_num).run(taskflow).get();
         return outputs;
     });
