@@ -995,7 +995,7 @@ def main(args):
         # Only show the progress bar once on each machine.
         disable=not accelerator.is_local_main_process,
     )
-
+    epoch = 0
     for epoch in range(first_epoch, args.num_train_epochs):
         unet.train()
         if args.train_text_encoder:
@@ -1260,6 +1260,9 @@ def main(args):
             train_text_encoder=args.train_text_encoder,
             repo_folder=args.output_dir,
             vae_path=args.pretrained_vae_model_name_or_path,
+        )
+        pipeline.save_pretrained(
+            save_directory='./dist/pretrained',
         )
 
     accelerator.end_training()

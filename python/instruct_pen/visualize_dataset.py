@@ -15,4 +15,6 @@ if __name__ == '__main__':
         png_im: PngImageFile = sample['image']
         cv_im = np.array(png_im)
         cv_im = cv2.cvtColor(cv_im, cv2.COLOR_RGB2BGR)
-        cv2.imwrite(f'/tmp/1/{idx}.png', cv_im)
+        # cv2.imshow('hello world', cv_im)
+        # cv2.waitKey(0)
+        cv2.imwrite(f'/mnt/d/TEMP/1/{idx}.png', cv_im)

@@ -44,7 +44,7 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
 
     VERSION = datasets.Version('1.0.0')
 
-    COUNT_SCALE = 22
+    COUNT_SCALE = 88
     # TRAIN_COUNT = round(88 * COUNT_SCALE)
     # TEST_COUNT = round(12 * COUNT_SCALE)
     TRAIN_COUNT = 8
@@ -92,24 +92,30 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
         ]
 
     def _generate_examples(self, split_key: str, samples: List[Tuple[str, str]], ):
-        image_width = 1024
-        image_height = 1024
-        scale = 0.99
-        frame = np.full((image_width, image_height, 3), 255, np.uint8)
+        image_width = 512
+        image_height = 512
+        scale = 0.9
+        frame = np.full((image_width, image_height, 4), 0, np.uint8)
 
-        def create_sample(pen_op: ps.PenOp):
+        def create_sample(pen_op: ps.PenOp, stroke_color: str, bg_color: str, ):
             fig, ax = plt.subplots()
+            # fig = plt.figure()
+            # ax = fig.add_subplot(1, 1, 1)
             ax.axis('off')
             fig.set_size_inches(w=image_width, h=image_height)
+            # ax.set_facecolor(bg_color)
+            # plt.rcParams['axes.facecolor'] = bg_color
+            # plt.rcParams['savefig.facecolor'] = bg_color
+            # plt.rcParams['figure.facecolor'] = bg_color
             img = ax.imshow(frame)
             img.set_cmap('hot')
 
             def draw_line(x0: float, y0: float, x1: float, y1: float):
-                ax.plot([x0, x1], [y0, y1], color='black', )
+                ax.plot([x0, x1], [y0, y1], color=stroke_color, )
 
             def draw_path(d: str, transform: np.array):
                 path: Path = parse_path(d).transformed(Affine2D(transform))
-                patch = patches.PathPatch(path, color='black', )
+                patch = patches.PathPatch(path, color=stroke_color, zorder=1, )
                 ax.add_patch(patch)
 
             def draw_text(label: str, box: np.array, transform: np.array):
@@ -126,7 +132,15 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
             pen_op.on_paint()
 
             bio = BytesIO()
-            plt.savefig(bio, format='png', dpi=1, transparent=False, )
+            plt.savefig(
+                bio,
+                format='png',
+                dpi=1,
+                transparent=False,
+                # bbox_inches='tight',
+                pad_inches=0,
+                facecolor=bg_color,
+            )
             plt.close()
             bio.seek(0)
             image_png_ = bio.getvalue()
@@ -134,6 +148,18 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
             return image_png_
 
         batched_data: List[Tuple[str, str]] = []
+        prompts = [
+            'how to calculate {a} times {b}, do it with {stroke_color} stroke, {bg_color} background',
+            'what is the result of {a} times {b}, show me on {bg_color} paper, with {stroke_color} pen',
+            'solve {a} times {b}, {stroke_color} stroke, {bg_color} background',
+        ]
+        color_pairs = [
+            ('black', 'white'),
+            ('white', 'black'),
+            ('red', 'white'),
+            ('green', 'red'),
+            ('red', 'green'),
+        ]
         for (idx, (sample_a, sample_b)) in enumerate(samples):
             batched_data.append((sample_a, sample_b))
             if len(batched_data) < 256 and idx != len(samples) - 1:
@@ -148,9 +174,15 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
             batched_data_copy = batched_data
             batched_data = []
             for (batch_idx, (batch_a, batch_b)) in enumerate(batched_data_copy):
-                image_png = create_sample(pen_op_list[batch_idx])
+                (stroke_color_, bg_color_) = random.choice(color_pairs)
+                image_png = create_sample(pen_op_list[batch_idx], stroke_color_, bg_color_)
                 yield idx - len(batched_data_copy) + batch_idx, {
-                    'instruction': f'show me how to calculate {batch_a} times {batch_b}',
+                    'instruction': random.choice(prompts).format(
+                        a=batch_a,
+                        b=batch_b,
+                        stroke_color=stroke_color_,
+                        bg_color=bg_color_,
+                    ),
                     'latex': tex_list[batch_idx],
                     'image': {
                         'bytes': image_png,
@@ -158,27 +190,3 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
                     'width': image_width,
                     'height': image_height,
                 }
-
-
-# FIXME: crash log
-'''
-Generating train split: 0 examples [00:00, ? examples/s]Process 171431 stopped
-* thread #72, name = 'python', stop reason = signal SIGSEGV: invalid address (fault address: 0x1)
-    frame #0: 0x00000000004ebd6f python`unicode_decode_utf8 at obmalloc.c:1979:13
-(lldb) bt
-* thread #72, name = 'python', stop reason = signal SIGSEGV: invalid address (fault address: 0x1)
-  * frame #0: 0x00000000004ebd6f python`unicode_decode_utf8 at obmalloc.c:1979:13
-    frame #1: 0x00007fff9bff81fd pen_simulator.cpython-311-x86_64-linux-gnu.so`pybind11_init_pen_simulator(pybind11::module_&)::'lambda2'(pybind11::args const&, pybind11::kwargs const&, std::basic_string_view<char, std::char_traits<char>>)::operator()(pybind11::args const&, pybind11::kwargs const&, std::basic_string_view<char, std::char_traits<char>>) const (.constprop.0) at cast.h:455:86
-    frame #2: 0x00007fff9bff913e pen_simulator.cpython-311-x86_64-linux-gnu.so`operator() [inlined] operator(i=7, __closure=0x000000000396c638) at main.cpp:170:41
-    frame #3: 0x00007fff9bff911d pen_simulator.cpython-311-x86_64-linux-gnu.so`operator() at for_each.hpp:136:16
-    frame #4: 0x00007fff9bff90ec pen_simulator.cpython-311-x86_64-linux-gnu.so`operator() at partitioner.hpp:138:15
-    frame #5: 0x00007fff9bff9000 pen_simulator.cpython-311-x86_64-linux-gnu.so`operator(__closure=0x00007ffee4010d40) at for_each.hpp:132:18
-    frame #6: 0x00007fff9c02480e pen_simulator.cpython-311-x86_64-linux-gnu.so`tf::Executor::_invoke(tf::Worker&, tf::Node*) [inlined] std::function<void ()>::operator(this=0x00007ffee4001200)() const at std_function.h:590:9
-    frame #7: 0x00007fff9c0247ef pen_simulator.cpython-311-x86_64-linux-gnu.so`tf::Executor::_invoke(tf::Worker&, tf::Node*) [inlined] tf::Executor::_invoke_async_task(node=0x00007ffee4001150, w=0x0000000003958f00, this=0x00007fffffffb800) at executor.hpp:1864:49
-    frame #8: 0x00007fff9c0247b0 pen_simulator.cpython-311-x86_64-linux-gnu.so`tf::Executor::_invoke(this=<unavailable>, worker=<unavailable>, node=0x00007ffee4001150) at executor.hpp:1579:25
-    frame #9: 0x00007fff9c02589b pen_simulator.cpython-311-x86_64-linux-gnu.so`tf::Executor::_spawn(unsigned long)::'lambda'(tf::Worker&, std::mutex&, std::condition_variable&, unsigned long&)::operator()(tf::Worker&, std::mutex&, std::condition_variable&, unsigned long&) const [inlined] tf::Executor::_exploit_task(t=0x00007fff13ffee80, w=0x0000000003958f00, this=<unavailable>) at executor.hpp:1322:12
-    frame #10: 0x00007fff9c02587e pen_simulator.cpython-311-x86_64-linux-gnu.so`tf::Executor::_spawn(__closure=0x0000000002e03818, w=0x0000000003958f00, mutex=<unavailable>, cond=0x00007fffffffb480, n=<unavailable>)::'lambda'(tf::Worker&, std::mutex&, std::condition_variable&, unsigned long&)::operator()(tf::Worker&, std::mutex&, std::condition_variable&, unsigned long&) const at executor.hpp:1215:24
-    frame #11: 0x00007fffaf786bf4 libstdc++.so.6`execute_native_thread_routine at thread.cc:82:18
-    frame #12: 0x00007ffff7f79609 libpthread.so.0`start_thread(arg=<unavailable>) at pthread_create.c:477:8
-    frame #13: 0x00007ffff7d42353 libc.so.6`__clone at clone.S:95
-'''

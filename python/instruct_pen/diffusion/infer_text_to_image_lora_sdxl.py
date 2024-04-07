@@ -1,9 +1,9 @@
 import torch
-from diffusers import DiffusionPipeline
+from diffusers import StableDiffusionXLPipeline
 
 if __name__ == '__main__':
-    model_path = './dist/sd-pokemon-model-lora-sdxl/'
-    pipe = DiffusionPipeline.from_pretrained(model_path, torch_dtype=torch.float16)
+    model_path = './dist/pretrained/'
+    pipe = StableDiffusionXLPipeline.from_pretrained(model_path, torch_dtype=torch.float16)
     pipe.to('cuda')
 
     prompt = 'A pokemon with green eyes and red legs.'
