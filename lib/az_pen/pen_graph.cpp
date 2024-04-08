@@ -104,7 +104,7 @@ Vec2 PenGraph::adjust_size_for_rendering(
         size_list.push_back(size.x());
         size_list.push_back(size.y());
     }
-    auto predicted_size = (vector_medium(size_list) + vector_mean<ScalarType>(size_list)) / ScalarType{2};
+    auto predicted_size = vector_medium(size_list);
     this->dot(ideal_item_size / predicted_size);
     this->move_tl_to(Vec2{0, 0});
     auto size = this->PenOp::bbox().sizes();

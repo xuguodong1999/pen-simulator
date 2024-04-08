@@ -226,6 +226,7 @@ def generate_batch(
         source_type: SourceType,
         text_type: TextType,
         traverse_order=TraverseOrder.DEFAULT,
+        parallel_num=-1,
 ) -> List[PenOp]:
     """
     a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
@@ -233,9 +234,11 @@ def generate_batch(
     :param source_type: svg or handwriting
     :param text_type: latex or smiles
     :param traverse_order: may be helpful when demonstrating drafts of multiplication
+    :param parallel_num: override default thread num, pass -1 if ignored
     :return: :class:`PenOp`
     """
     ...
+
 
 def generate_batch_image(
         *,
@@ -243,6 +246,9 @@ def generate_batch_image(
         source_type: SourceType,
         text_type: TextType,
         traverse_order=TraverseOrder.DEFAULT,
+        frame_width=-1,
+        frame_height=-1,
+        parallel_num=-1,
 ) -> List[bytes]:
     """
     a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
@@ -251,9 +257,39 @@ def generate_batch_image(
     :param source_type: svg or handwriting
     :param text_type: latex or smiles
     :param traverse_order: may be helpful when demonstrating drafts of multiplication
+    :param frame_width: pass -1 if use original render size
+    :param frame_height: pass -1 if use original render size
+    :param parallel_num: override default thread num, pass -1 if ignored
     :return: list of png buffer
     """
     ...
+
+
+# TODO: not work yet, current it behavior the same as generate_batch_image
+def generate_batch_video(
+        *,
+        texts: List[str],
+        source_type: SourceType,
+        text_type: TextType,
+        traverse_order=TraverseOrder.DEFAULT,
+        frame_width=-1,
+        frame_height=-1,
+        parallel_num=-1,
+) -> List[bytes]:
+    """
+    a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
+    this API is used for massive video generation
+    :param texts: list of input content
+    :param source_type: svg or handwriting
+    :param text_type: latex or smiles
+    :param traverse_order: may be helpful when demonstrating drafts of multiplication
+    :param frame_width: pass -1 if use original render size
+    :param frame_height: pass -1 if use original render size
+    :param parallel_num: override default thread num, pass -1 if ignored
+    :return: list of mp4 buffer
+    """
+    ...
+
 
 def generate_multiply_draft_latex(a: str, b: str) -> str:
     """
