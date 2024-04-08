@@ -226,7 +226,7 @@ def generate_batch(
         source_type: SourceType,
         text_type: TextType,
         traverse_order=TraverseOrder.DEFAULT,
-) -> [PenOp]:
+) -> List[PenOp]:
     """
     a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
     :param texts: list of input content
@@ -237,6 +237,23 @@ def generate_batch(
     """
     ...
 
+def generate_batch_image(
+        *,
+        texts: List[str],
+        source_type: SourceType,
+        text_type: TextType,
+        traverse_order=TraverseOrder.DEFAULT,
+) -> List[bytes]:
+    """
+    a wrapper for SynthesisTexGenerator and StructuralFormulaItem in c++, enable multithreading with taskflow
+    this API is used for massive image generation
+    :param texts: list of input content
+    :param source_type: svg or handwriting
+    :param text_type: latex or smiles
+    :param traverse_order: may be helpful when demonstrating drafts of multiplication
+    :return: list of png buffer
+    """
+    ...
 
 def generate_multiply_draft_latex(a: str, b: str) -> str:
     """

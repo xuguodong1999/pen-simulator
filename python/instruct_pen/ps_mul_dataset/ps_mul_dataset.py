@@ -7,7 +7,9 @@ import string
 from io import BytesIO
 from typing import List, Tuple
 
+import colour
 import datasets
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patches
@@ -39,16 +41,20 @@ _HOMEPAGE = 'https://github.com/xuguodong1999/pen-simulator'
 _LICENSE = 'GPL-3.0 license'
 
 
+def hex_to_lab(color: str):
+    return colour.XYZ_to_Lab(colour.RGB_to_XYZ(colour.notation.HEX_to_RGB(color), colourspace='sRGB'))
+
+
 class PSMulDataset(datasets.GeneratorBasedBuilder):
     """PEN-SIMULATOR dataset."""
 
     VERSION = datasets.Version('1.0.0')
 
     COUNT_SCALE = 88
-    # TRAIN_COUNT = round(88 * COUNT_SCALE)
-    # TEST_COUNT = round(12 * COUNT_SCALE)
-    TRAIN_COUNT = 8
-    TEST_COUNT = 1
+    TRAIN_COUNT = round(88 * COUNT_SCALE)
+    TEST_COUNT = round(12 * COUNT_SCALE)
+    # TRAIN_COUNT = 8
+    # TEST_COUNT = 1
 
     def _info(self):
         features = datasets.Features({
@@ -99,14 +105,8 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
 
         def create_sample(pen_op: ps.PenOp, stroke_color: str, bg_color: str, ):
             fig, ax = plt.subplots()
-            # fig = plt.figure()
-            # ax = fig.add_subplot(1, 1, 1)
             ax.axis('off')
             fig.set_size_inches(w=image_width, h=image_height)
-            # ax.set_facecolor(bg_color)
-            # plt.rcParams['axes.facecolor'] = bg_color
-            # plt.rcParams['savefig.facecolor'] = bg_color
-            # plt.rcParams['figure.facecolor'] = bg_color
             img = ax.imshow(frame)
             img.set_cmap('hot')
 
@@ -137,7 +137,6 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
                 format='png',
                 dpi=1,
                 transparent=False,
-                # bbox_inches='tight',
                 pad_inches=0,
                 facecolor=bg_color,
             )
@@ -149,17 +148,25 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
 
         batched_data: List[Tuple[str, str]] = []
         prompts = [
-            'how to calculate {a} times {b}, do it with {stroke_color} stroke, {bg_color} background',
+            'how to calculate {a} times {b}, do it with {stroke_color} pen, {bg_color} background',
             'what is the result of {a} times {b}, show me on {bg_color} paper, with {stroke_color} pen',
             'solve {a} times {b}, {stroke_color} stroke, {bg_color} background',
+            'math draft, {a} times {b}, {stroke_color} stroke, {bg_color} background',
+            '{a} times {b}, {stroke_color} stroke, {bg_color} background',
+            '{stroke_color} stroke, {bg_color} background, {a} times {b}',
         ]
-        color_pairs = [
-            ('black', 'white'),
-            ('white', 'black'),
-            ('red', 'white'),
-            ('green', 'red'),
-            ('red', 'green'),
-        ]
+        css_colors = list(mcolors.CSS4_COLORS.items())
+        # css_colors = random.sample(css_colors, 64)
+        color_pairs = []
+        for i in range(0, len(css_colors)):
+            name1, value1 = css_colors[i]
+            lab1 = hex_to_lab(value1)
+            for j in range(i + 1, len(css_colors)):
+                name2, value2 = css_colors[j]
+                lab2 = hex_to_lab(value2)
+                delta_e = colour.delta_E(lab1, lab2, )
+                if delta_e > 20:
+                    color_pairs.append((name1, name2))
         for (idx, (sample_a, sample_b)) in enumerate(samples):
             batched_data.append((sample_a, sample_b))
             if len(batched_data) < 256 and idx != len(samples) - 1:

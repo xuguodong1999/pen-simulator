@@ -8,5 +8,5 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
         CXX_STANDARD_REQUIRED ON)
 target_compile_definitions(${PROJECT_NAME} PRIVATE PYBIND11_DETAILED_ERROR_MESSAGES)
 
-xgd_link_libraries(${PROJECT_NAME} PRIVATE AzMath AzData AzPen AzCore eigen spdlog taskflow)
+xgd_link_libraries(${PROJECT_NAME} PRIVATE AzMath AzData AzPen AzCore eigen spdlog taskflow skia)
 target_include_directories(${PROJECT_NAME} PRIVATE ${NUMPY_INCLUDE_DIR})

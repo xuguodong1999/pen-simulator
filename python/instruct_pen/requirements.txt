@@ -12,3 +12,4 @@ matplotlib
 svgpath2mpl
 pillow
 opencv-python
+colour-science

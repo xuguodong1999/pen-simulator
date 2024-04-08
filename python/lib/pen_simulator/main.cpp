@@ -183,6 +183,30 @@ PYBIND11_MODULE(pen_simulator, m) {
         return outputs;
     });
 
+    m.def("generate_batch_image", [&](const py::args &args, const py::kwargs &kwargs) {
+        SourceType source_type = SourceType::HANDWRITING;
+        TextType text_type = TextType::LATEX;
+        auto traverse_order = SynthesisTexGenerator::TraverseOrder::DEFAULT;
+        if (kwargs.contains("source_type")) { source_type = kwargs["source_type"].cast<SourceType>(); }
+        if (kwargs.contains("text_type")) { text_type = kwargs["text_type"].cast<TextType>(); }
+        if (kwargs.contains("traverse_order")) {
+            traverse_order = kwargs["traverse_order"].cast<SynthesisTexGenerator::TraverseOrder>();
+        }
+        auto texts = kwargs["texts"].cast<std::vector<std::string_view>>();
+
+        PointerVec<std::vector<uint8_t>> outputs;
+        outputs.reserve(texts.size());
+        outputs.resize(texts.size());
+        tf::Taskflow taskflow;
+        taskflow.for_each_index(size_t{0}, texts.size(), size_t{1}, [&](size_t i) {
+            auto pen_op = generate_single(texts[i], source_type, text_type, traverse_order);
+            // TODO: render and encode pen_op into outputs
+        });
+        const auto thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
+        tf::Executor(thread_num).run(taskflow).get();
+//        return outputs;
+    });
+
     m.def("generate_multiply_draft_latex", [](std::string_view a, std::string_view b) {
         return az::math::MultiplyDraft::generate(a, b);
     });
