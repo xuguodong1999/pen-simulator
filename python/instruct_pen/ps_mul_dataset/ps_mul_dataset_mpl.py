@@ -3,7 +3,6 @@
 """PEN-SIMULATOR dataset."""
 
 import random
-import string
 from io import BytesIO
 from typing import List, Tuple
 
@@ -18,6 +17,8 @@ from matplotlib.transforms import Affine2D
 from svgpath2mpl import parse_path
 
 import pen_simulator as ps
+from instruct_pen.ps_mul_dataset.prompts import COLORFUL_PROMPTS
+from instruct_pen.ps_mul_dataset.utils import get_ps_inputs
 
 _CITATION = r"""\
 @misc{PENSIM2024,
@@ -45,14 +46,15 @@ def hex_to_lab(color: str):
     return colour.XYZ_to_Lab(colour.RGB_to_XYZ(colour.notation.HEX_to_RGB(color), colourspace='sRGB'))
 
 
+TRAIN_COUNT = 8888
+TEST_COUNT = 1
+DELTA_E_THRESHOLD = 20
+
+
 class PSMulDataset(datasets.GeneratorBasedBuilder):
     """PEN-SIMULATOR dataset."""
 
     VERSION = datasets.Version('1.0.0')
-
-    TRAIN_COUNT = 8
-    TEST_COUNT = 1
-    DELTA_E_THRESHOLD = 20
 
     def _info(self):
         features = datasets.Features({
@@ -71,34 +73,27 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        def get_random_float() -> str:
-            max_length = 6
-            length = random.randint(2, max_length)
-            number = ''.join(random.choice(string.digits) for _ in range(length))
-            idx = random.randint(0, length)
-            return f'{number[0:idx]}.{number[idx:length]}'
-
         return [
             datasets.SplitGenerator(
                 name=datasets.Split.TRAIN,
-                gen_kwargs={'split_key': 'train', 'samples': [(
-                    get_random_float(),
-                    get_random_float(),
-                ) for _ in range(self.TRAIN_COUNT)]},
+                gen_kwargs={
+                    'split_key': 'train',
+                    'samples': get_ps_inputs(TRAIN_COUNT),
+                },
             ),
             datasets.SplitGenerator(
                 name=datasets.Split.TEST,
-                gen_kwargs={'split_key': 'test', 'samples': [(
-                    get_random_float(),
-                    get_random_float(),
-                ) for _ in range(self.TEST_COUNT)]},
+                gen_kwargs={
+                    'split_key': 'test',
+                    'samples': get_ps_inputs(TEST_COUNT),
+                },
             ),
         ]
 
     def _generate_examples(self, split_key: str, samples: List[Tuple[str, str]], ):
-        image_width = 512
-        image_height = 512
-        scale = 0.9
+        image_width = 1024
+        image_height = 1024
+        scale = 1 / 1.2
         frame = np.full((image_width, image_height, 4), 0, np.uint8)
 
         def create_sample(pen_op: ps.PenOp, stroke_color: str, bg_color: str, ):
@@ -144,14 +139,7 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
             bio.close()
             return image_png_
 
-        prompts = [
-            'how to calculate {a} times {b}, do it with {stroke_color} pen, {bg_color} background',
-            'what is the result of {a} times {b}, show me on {bg_color} paper, with {stroke_color} pen',
-            'solve {a} times {b}, {stroke_color} stroke, {bg_color} background',
-            'math draft, {a} times {b}, {stroke_color} stroke, {bg_color} background',
-            '{a} times {b}, {stroke_color} stroke, {bg_color} background',
-            '{stroke_color} stroke, {bg_color} background, {a} times {b}',
-        ]
+        prompts = COLORFUL_PROMPTS
         css_colors = list(mcolors.CSS4_COLORS.items())
         css_colors = random.sample(css_colors, 64)
         color_pairs = []
@@ -162,17 +150,22 @@ class PSMulDataset(datasets.GeneratorBasedBuilder):
                 name2, value2 = css_colors[j]
                 lab2 = hex_to_lab(value2)
                 delta_e = colour.delta_E(lab1, lab2, )
-                if delta_e > self.DELTA_E_THRESHOLD:
+                if delta_e > DELTA_E_THRESHOLD:
                     color_pairs.append((name1, name2))
 
         for (idx, (a, b)) in enumerate(samples):
             tex = ps.generate_multiply_draft_latex(a, b)
-            pen_op = ps.generate(
-                text=tex,
-                source_type=ps.SourceType.SVG,
-                text_type=ps.TextType.LATEX,
-                traverse_order=ps.TraverseOrder.SORT_BY_MULTIPLY_DEMONSTRATION,
-            )
+
+            # @profile
+            def ps_generate():
+                return ps.generate(
+                    text=tex,
+                    source_type=ps.SourceType.SVG,
+                    text_type=ps.TextType.LATEX,
+                    traverse_order=ps.TraverseOrder.SORT_BY_MULTIPLY_DEMONSTRATION,
+                )
+
+            pen_op = ps_generate()
             (stroke_color_, bg_color_) = random.choice(color_pairs)
             image_png = create_sample(pen_op, stroke_color_, bg_color_)
             yield idx, {

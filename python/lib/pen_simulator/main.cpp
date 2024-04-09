@@ -252,6 +252,12 @@ PYBIND11_MODULE(pen_simulator, m) {
             }
             int render_width = std::ceil(width);
             int render_height = std::ceil(height);
+            if (render_width < frame_width && render_height < frame_height) {
+                render_width = frame_width;
+                render_height = frame_height;
+                pen_op->fit_into_keep_ratio(render_width / BLANK_PADDING_RATIO, render_height / BLANK_PADDING_RATIO);
+                pen_op->move_center_to(Vec2{render_width, render_height} / 2);
+            }
             outputs[i] = on_media(pen_op.get(), PenOpPaintParam{
                     .render_width=render_width,
                     .render_height=render_height,
