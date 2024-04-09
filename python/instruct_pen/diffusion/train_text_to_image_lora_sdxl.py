@@ -433,6 +433,8 @@ def parse_args(input_args=None):
 
 DATASET_NAME_MAPPING = {
     "lambdalabs/pokemon-blip-captions": ("image", "text"),
+    "/home/xgd/_source/repos/xgd-project/python/instruct_pen/ps_mul_dataset/ps_mul_dataset.py": (
+    "image", "instruction"),
 }
 
 
@@ -1261,9 +1263,9 @@ def main(args):
             repo_folder=args.output_dir,
             vae_path=args.pretrained_vae_model_name_or_path,
         )
-        pipeline.save_pretrained(
-            save_directory='./dist/pretrained',
-        )
+        # pipeline.save_pretrained(
+        #     save_directory='./dist/pretrained',
+        # )
 
     accelerator.end_training()
 

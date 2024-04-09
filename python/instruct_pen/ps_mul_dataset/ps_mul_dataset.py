@@ -29,12 +29,8 @@ _HOMEPAGE = 'https://github.com/xuguodong1999/pen-simulator'
 
 _LICENSE = 'GPL-3.0 license'
 
-# COUNT_SCALE = 88
-# TRAIN_COUNT = round(88 * COUNT_SCALE)
-# TEST_COUNT = round(12 * COUNT_SCALE)
-
-TRAIN_COUNT = 60022
-TEST_COUNT = 2022
+TRAIN_COUNT = 60000
+TEST_COUNT = 1000
 
 
 class PSMulDataset(datasets.GeneratorBasedBuilder):

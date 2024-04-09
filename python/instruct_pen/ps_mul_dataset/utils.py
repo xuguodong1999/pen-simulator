@@ -5,7 +5,7 @@ from typing import List, Tuple
 import datasets
 
 import pen_simulator as ps
-from instruct_pen.ps_mul_dataset.prompts import COLORFUL_PROMPTS
+from instruct_pen.ps_mul_dataset.prompts import NO_COLOR_PROMPTS
 
 
 def get_random_float() -> str:
@@ -41,10 +41,10 @@ def get_ps_features():
 
 
 def ps_generator_mt(samples: List[Tuple[str, str]], ):
-    image_width = 1024
-    image_height = 1024
+    image_width = 512
+    image_height = 512
     batched_data: List[Tuple[str, str]] = []
-    prompts = COLORFUL_PROMPTS
+    prompts = NO_COLOR_PROMPTS
     for (idx, (sample_a, sample_b)) in enumerate(samples):
         batched_data.append((sample_a, sample_b))
         if len(batched_data) < 256 and idx != len(samples) - 1:

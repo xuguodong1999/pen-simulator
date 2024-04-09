@@ -8,3 +8,15 @@ COLORFUL_PROMPTS = [
     'number {a}, times, number {b}, {stroke_color} stroke, {bg_color} background',
     'number {a}, multiply, number {b}, {stroke_color} stroke, {bg_color} background',
 ]
+
+NO_COLOR_PROMPTS = [
+    'how to calculate {a} times {b}',
+    'what is the result of {a} times {b}',
+    'what is {a} times {b}',
+    'solve {a} times {b}',
+    'math draft, {a} times {b}',
+    '{a} times {b}',
+    '{a}, times operation, {b}',
+    'number {a}, times, number {b}',
+    'number {a}, multiply, number {b}',
+]

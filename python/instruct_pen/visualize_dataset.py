@@ -56,8 +56,8 @@ if __name__ == '__main__':
     ps_mul_train = ps_mul_dataset['train']
 
     print(ps_mul_dataset)
-    ps_mul_dataset.save_to_disk('/tmp/1/ps-multiplication')
-    pass
+    # ps_mul_dataset.save_to_disk('/tmp/1/ps-multiplication')
+
     # ps_mul_train = get_ps_dataset_mt2()
     max_sample_count = 8
     samples = []
@@ -72,5 +72,5 @@ if __name__ == '__main__':
         print(f'instruction={instruction}')
         # cv2.imshow('hello world', image)
         # cv2.waitKey(0)
-        cv2.imwrite(f'/tmp/1/{idx}.png', image)
-        # cv2.imwrite(f'/mnt/d/TEMP/1/{idx}.png', image)
+        # cv2.imwrite(f'/tmp/1/{idx}.png', image)
+        cv2.imwrite(f'/mnt/d/TEMP/1/{idx}.png', image)
