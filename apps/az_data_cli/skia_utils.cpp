@@ -24,7 +24,7 @@
 using namespace az;
 using namespace az::pen;
 
-//#define USE_ARGB
+//#define USE_RGBA
 //#define RENDER_FRAMES
 
 static SkBitmap create_bitmap(const int &w, const int &h) {
@@ -32,7 +32,7 @@ static SkBitmap create_bitmap(const int &w, const int &h) {
     bitmap.setInfo(SkImageInfo::Make(
             w,
             h,
-#ifdef USE_ARGB
+#ifdef USE_RGBA
             SkColorType::kRGBA_8888_SkColorType,
 #else
             SkColorType::kGray_8_SkColorType,
@@ -203,13 +203,13 @@ void display_in_opencv_highgui(
 #ifndef RENDER_FRAMES
             if (action != "bitmap") { return; }
 #endif
-#ifdef USE_ARGB
+#ifdef USE_RGBA
             cv::Mat frame(cv::Size{bitmap.width(), bitmap.height()}, CV_8UC4, bitmap.getPixels());
 #else
             cv::Mat frame(cv::Size{bitmap.width(), bitmap.height()}, CV_8UC1, bitmap.getPixels());
 #endif
             opencv_resize(frame, frame, cv::Size{win_width, win_height});
-#ifdef USE_ARGB
+#ifdef USE_RGBA
             cv::cvtColor(frame, frame, cv::COLOR_RGBA2BGRA);
 #endif
             cv::imshow(win_id, frame);

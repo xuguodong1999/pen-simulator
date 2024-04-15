@@ -16,19 +16,21 @@
 #include <SkPixelRef.h>
 #include <SkPngEncoder.h>
 
+#include <boost/process.hpp>
+
 #include <spdlog/spdlog.h>
 
 using namespace az;
 using namespace az::pen;
 
-//#define USE_ARGB
+#define USE_RGBA
 
 static SkBitmap create_bitmap(const int &w, const int &h) {
     SkBitmap bitmap;
     bitmap.setInfo(SkImageInfo::Make(
             w,
             h,
-#ifdef USE_ARGB
+#ifdef USE_RGBA
             SkColorType::kRGBA_8888_SkColorType,
 #else
             SkColorType::kGray_8_SkColorType,
@@ -193,23 +195,43 @@ std::vector<uint8_t> pen_op_to_mp4(
     SkPaint copy_paint = create_paint(param.stroke_color, param.stroke_width);
     auto copy_bitmap = create_bitmap(param.frame_width, param.frame_height);
     SkCanvas canvas(copy_bitmap);
+
     std::vector<uint8_t> buffer;
+
+    namespace bp = boost::process;
+    using namespace std::chrono_literals;
+    using boost::system::error_code;
+    bp::group pg;
+
+    struct {
+        std::string cmd;
+        std::vector<std::string> args;
+    } task = {"ffmpeg", {
+            "-y",
+            "-f", "rawvideo",
+            "-vcodec", "rawvideo",
+            "-framerate", "24",
+            "-s", fmt::format("{}x{}", param.frame_width, param.frame_height).data(),
+            "-pix_fmt", "rgba",
+            "-i", "-",
+            "-c:v", "libx264",
+            "-r", "24",
+    }};
+    // TODO: bind output to buffer
+    bp::opstream cp_stream;
+    bp::child cp(
+            pg, bp::search_path(task.cmd), bp::args(task.args),
+            bp::std_in = cp_stream
+    );
     render_with_skia(data, param, [&](
             const SkBitmap &bitmap, std::string_view action
     ) {
         skia_resize(canvas, bitmap, param);
-        SkDynamicMemoryWStream out;
-        SkPngEncoder::Options opt;
-        opt.fZLibLevel = 9;
-        bool res = SkPngEncoder::Encode(&out, copy_bitmap.pixmap(), opt);
-        if (res) {
-            // TODO: encode buffer into mp4
-            buffer.reserve(out.bytesWritten());
-            buffer.resize(out.bytesWritten());
-            out.copyToAndReset(buffer.data());
-        } else {
-            SPDLOG_ERROR("SkPngEncoder::Encode:{}", res);
-        }
+        cp_stream.write((char *) bitmap.getPixels(), sizeof(uint8_t) * param.frame_width * param.frame_height * 4);
     });
+    cp_stream.flush();
+    cp_stream.pipe().close();
+    cp.wait();
+    SPDLOG_INFO("Done, exit code: {}", cp.exit_code());
     return buffer;
 }

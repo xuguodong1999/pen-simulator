@@ -13,5 +13,6 @@ xgd_link_libraries(
         PRIVATE
         AzMath AzData AzPen AzJs AzCore
         eigen spdlog taskflow skia
+        boost_process
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${NUMPY_INCLUDE_DIR})
