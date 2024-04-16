@@ -41,13 +41,18 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     } task = {"ffmpeg", {
             "-y",
             "-f", "rawvideo",
+//            "-hwaccel", "cuda",
+//            "-hwaccel_output_format", "cuda",
             "-vcodec", "rawvideo",
-            "-framerate", "24",
+            "-framerate", "60",
             "-s", fmt::format("{}x{}", param.frame_width, param.frame_height).data(),
             "-pix_fmt", "rgba",
             "-i", "-",
-            "-c:v", "libx265",
-            "-r", "24",
+            "-c:v", "nvenc_hevc",
+//            "-c:v", "h264_nvenc",
+//            "-c:v", "libx265",
+//            "-c:v", "h264",
+            "-r", "60",
             "-movflags", "frag_keyframe+empty_moov",
             "-f", "mp4",
             "-loglevel", "error",
@@ -66,13 +71,13 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     stream_pump = [&, buf = std::vector<uint8_t>(1024)]() mutable {
         boost::asio::async_read(iso, boost::asio::buffer(buf), [&](error_code ec, size_t const nread) {
             bool const eof = (ec == boost::asio::error::eof);
-//            SPDLOG_INFO("nread: {} (eof:{})", nread, eof);
+            SPDLOG_INFO("nread: {} (eof:{})", nread, eof);
             if (ec && !eof) {
                 SPDLOG_ERROR("async_read: {} ({})", ec.message(), nread);
                 return;
             }
-            if (eof) { return; }
             std::copy(buf.begin(), buf.begin() + nread, std::back_inserter(buffer));
+            if (eof) { return; }
             stream_pump();
         });
     };
@@ -80,9 +85,8 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     render_with_skia(data, param, [&](
             const SkBitmap &bitmap, std::string_view action
     ) {
-        if ("bitmap" == action) { return; }
         skia_resize(canvas, bitmap, param);
-        cp_in.write((char *) bitmap.getPixels(), sizeof(uint8_t) * param.frame_width * param.frame_height * 4);
+        cp_in.write((char *) copy_bitmap.getPixels(), sizeof(uint8_t) * param.frame_width * param.frame_height * 4);
     });
     cp_in.flush();
     cp_in.pipe().close();
