@@ -7,7 +7,7 @@
 #include "az/data/im2latex_reader.h"
 #include "az/data/unicode_shape.h"
 
-#include "skia_utils.h"
+#include "utils.h"
 #include <spdlog/spdlog.h>
 #include <gtest/gtest.h>
 

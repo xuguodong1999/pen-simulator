@@ -1,4 +1,4 @@
-#include "skia_utils.h"
+#include "az/media/data_output.h"
 
 #include "az/pen/pen_op.h"
 #include "az/pen/pen_context.h"
@@ -192,7 +192,7 @@ PYBIND11_MODULE(pen_simulator, m) {
     using fn_media_callback = std::function<
             std::vector<uint8_t>(
                     az::pen::PenOp *data,
-                    const PenOpPaintParam &param
+                    const az::media::PenOpPaintParam &param
             )
     >;
     const auto generate_batch_media = [&](const py::args &args, const py::kwargs &kwargs,
@@ -258,7 +258,7 @@ PYBIND11_MODULE(pen_simulator, m) {
                 pen_op->fit_into_keep_ratio(render_width / BLANK_PADDING_RATIO, render_height / BLANK_PADDING_RATIO);
                 pen_op->move_center_to(Vec2{render_width, render_height} / 2);
             }
-            outputs[i] = on_media(pen_op.get(), PenOpPaintParam{
+            outputs[i] = on_media(pen_op.get(), az::media::PenOpPaintParam{
                     .render_width=render_width,
                     .render_height=render_height,
                     .stroke_width=STROKE_WIDTH,
@@ -277,11 +277,11 @@ PYBIND11_MODULE(pen_simulator, m) {
         return py_outputs;
     };
     m.def("generate_batch_image", [&](const py::args &args, const py::kwargs &kwargs) {
-        return generate_batch_media(args, kwargs, pen_op_to_png);
+        return generate_batch_media(args, kwargs, az::media::pen_op_to_image);
     });
 
     m.def("generate_batch_video", [&](const py::args &args, const py::kwargs &kwargs) {
-        return generate_batch_media(args, kwargs, pen_op_to_mp4);
+        return generate_batch_media(args, kwargs, az::media::pen_op_to_video);
     });
 
     m.def("generate_multiply_draft_latex", [](std::string_view a, std::string_view b) {

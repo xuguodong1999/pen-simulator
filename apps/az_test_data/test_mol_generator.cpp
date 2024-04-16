@@ -5,7 +5,7 @@
 #include "az/data/structural_formula_item.h"
 #include "az/data/unicode_shape.h"
 
-#include "skia_utils.h"
+#include "utils.h"
 
 #include <spdlog/spdlog.h>
 #include <gtest/gtest.h>
@@ -45,7 +45,6 @@ static void run() {
             "Couch_Symbol_130"
     });
 //    SPDLOG_INFO("Ａ={}", az::data::map_unicode_by_label("Ａ").value());
-    SynthesisTexGenerator generator;
     std::unordered_set<UCharType> failed_cases;
     const ShapeProvider shape_provider = [&](const UCharType &label) {
         return reader.select(label);

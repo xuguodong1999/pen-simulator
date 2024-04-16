@@ -1,4 +1,4 @@
-project(az-test-data)
+project(az-test-media)
 xgd_add_executable(
         ${PROJECT_NAME}
         SRC_DIRS
@@ -12,13 +12,6 @@ xgd_link_libraries(
         PRIVATE
         AzMedia
         AzData
-        AzJs
-        skia
-        opencv_imgproc
-        boost_property_tree
+        AzPen
         spdlog
 )
-
-if (EMSCRIPTEN)
-    xgd_emcc_link_rawfs_net(${PROJECT_NAME})
-endif ()

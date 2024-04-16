@@ -9,6 +9,7 @@ xgd_add_executable(
 xgd_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
+        AzMedia
         AzData
         AzMath
         AzJs

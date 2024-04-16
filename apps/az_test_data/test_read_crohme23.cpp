@@ -1,7 +1,7 @@
 #include "az/data/inkml_reader.h"
 #include "az/pen/pen_op.h"
 
-#include "skia_utils.h"
+#include "utils.h"
 
 #include <spdlog/spdlog.h>
 

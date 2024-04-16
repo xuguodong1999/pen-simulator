@@ -11,8 +11,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE PYBIND11_DETAILED_ERROR_MESSA
 xgd_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
-        AzMath AzData AzPen AzJs AzCore
-        eigen spdlog taskflow skia
-        boost_process
+        AzMedia AzMath AzData AzPen
+        taskflow spdlog
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ${NUMPY_INCLUDE_DIR})
