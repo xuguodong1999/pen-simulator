@@ -1,3 +1,4 @@
+import json
 import random
 import string
 from typing import List, Tuple
@@ -32,9 +33,21 @@ def get_ps_inputs(count: int):
 
 def get_ps_features():
     return datasets.Features({
+        'meta_json': datasets.Value('string'),
         'instruction': datasets.Value('string'),
         'latex': datasets.Value('string'),
         'image': datasets.Image(),
+        'width': datasets.Value('int32'),
+        'height': datasets.Value('int32'),
+    })
+
+
+def get_ps_video_features():
+    return datasets.Features({
+        'meta_json': datasets.Value('string'),
+        'instruction': datasets.Value('string'),
+        'latex': datasets.Value('string'),
+        'video': datasets.Value('binary'),
         'width': datasets.Value('int32'),
         'height': datasets.Value('int32'),
     })
@@ -64,16 +77,67 @@ def ps_generator_mt(samples: List[Tuple[str, str]], ):
         # image_png_list = [b'' for _ in range(len(batched_data))]
         for (batch_idx, (batch_a, batch_b)) in enumerate(batched_data):
             yield idx - len(batched_data) + batch_idx, {
+                'meta_json': json.dumps({
+                    'a': batch_a,
+                    'b': batch_b,
+                    'stroke_color': 'white',
+                    'bg_color': 'black',
+                }),
                 'instruction': random.choice(prompts).format(
                     a=batch_a,
                     b=batch_b,
-                    stroke_color='black',
-                    bg_color='white',
+                    stroke_color='white',
+                    bg_color='black',
                 ),
                 'latex': tex_list[batch_idx],
                 'image': {
                     'bytes': image_png_list[batch_idx],
                 },
+                'width': image_width,
+                'height': image_height,
+            }
+        batched_data = []
+
+
+def ps_video_generator_mt(samples: List[Tuple[str, str]], ):
+    image_width = 512
+    image_height = 512
+    batched_data: List[Tuple[str, str]] = []
+    prompts = NO_COLOR_PROMPTS
+    for (idx, (sample_a, sample_b)) in enumerate(samples):
+        batched_data.append((sample_a, sample_b))
+        if len(batched_data) < 256 and idx != len(samples) - 1:
+            continue
+        tex_list = [ps.generate_multiply_draft_latex(a, b) for (a, b) in batched_data]
+        video_mp4_list = ps.generate_batch_video(
+            texts=tex_list,
+            # source_type=ps.SourceType.SVG,
+            source_type=ps.SourceType.HANDWRITING,
+            text_type=ps.TextType.LATEX,
+            traverse_order=ps.TraverseOrder.SORT_BY_MULTIPLY_DEMONSTRATION,
+            frame_width=image_width,
+            frame_height=image_height,
+            parallel_num=1,
+            # parallel_num=20,
+        )
+        # print(f'len(batched_data)={len(batched_data)}')
+        # image_png_list = [b'' for _ in range(len(batched_data))]
+        for (batch_idx, (batch_a, batch_b)) in enumerate(batched_data):
+            yield idx - len(batched_data) + batch_idx, {
+                'meta_json': json.dumps({
+                    'a': batch_a,
+                    'b': batch_b,
+                    'stroke_color': 'white',
+                    'bg_color': 'black',
+                }),
+                'instruction': random.choice(prompts).format(
+                    a=batch_a,
+                    b=batch_b,
+                    stroke_color='white',
+                    bg_color='black',
+                ),
+                'latex': tex_list[batch_idx],
+                'video': video_mp4_list[batch_idx],
                 'width': image_width,
                 'height': image_height,
             }

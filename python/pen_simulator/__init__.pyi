@@ -264,8 +264,6 @@ def generate_batch_image(
     """
     ...
 
-
-# TODO: not work yet, current it behavior the same as generate_batch_image
 def generate_batch_video(
         *,
         texts: List[str],

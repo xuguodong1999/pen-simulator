@@ -24,6 +24,11 @@ def get_ps_dataset_mt():
         trust_remote_code=True,
     )
 
+def get_ps_video_dataset_mt():
+    return load_dataset(
+        './ps_mul_dataset/ps_mul_video_dataset.py',
+        trust_remote_code=True,
+    )
 
 def get_ps_dataset_mt2():
     def ps_generator_wrapper():
@@ -52,25 +57,26 @@ if __name__ == '__main__':
 
     ps.global_init_couch(args.couch, ['Couch_Digit_195', 'Couch_Letter_195', 'Couch_Symbol_130', ])
     ps.global_init_makemeahanzi(args.makemeahanzi)
-    ps_mul_dataset = get_ps_dataset_mt()
+    # ps_mul_dataset = get_ps_dataset_mt()
+    ps_mul_dataset = get_ps_video_dataset_mt()
     ps_mul_train = ps_mul_dataset['train']
 
     print(ps_mul_dataset)
     # ps_mul_dataset.save_to_disk('/tmp/1/ps-multiplication')
 
     # ps_mul_train = get_ps_dataset_mt2()
-    max_sample_count = 8
-    samples = []
-    for idx, sample in enumerate(ps_mul_train.shuffle()):
-        if idx >= max_sample_count:
-            break
-        png_im: PngImageFile = sample['image']
-        cv_im = np.array(png_im)
-        cv_im = cv2.cvtColor(cv_im, cv2.COLOR_RGB2BGR)
-        samples.append((sample['instruction'], cv_im))
-    for idx, (instruction, image) in enumerate(samples):
-        print(f'instruction={instruction}')
-        # cv2.imshow('hello world', image)
-        # cv2.waitKey(0)
-        # cv2.imwrite(f'/tmp/1/{idx}.png', image)
-        cv2.imwrite(f'/mnt/d/TEMP/1/{idx}.png', image)
+    # max_sample_count = 8
+    # samples = []
+    # for idx, sample in enumerate(ps_mul_train.shuffle()):
+    #     if idx >= max_sample_count:
+    #         break
+    #     png_im: PngImageFile = sample['image']
+    #     cv_im = np.array(png_im)
+    #     cv_im = cv2.cvtColor(cv_im, cv2.COLOR_RGB2BGR)
+    #     samples.append((sample['instruction'], cv_im))
+    # for idx, (instruction, image) in enumerate(samples):
+    #     print(f'instruction={instruction}')
+    #     # cv2.imshow('hello world', image)
+    #     # cv2.waitKey(0)
+    #     # cv2.imwrite(f'/tmp/1/{idx}.png', image)
+    #     cv2.imwrite(f'/mnt/d/TEMP/1/{idx}.png', image)
