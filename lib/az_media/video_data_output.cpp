@@ -30,6 +30,7 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     namespace bp = boost::process;
     using namespace std::chrono_literals;
     using boost::system::error_code;
+    bp::group group;
 
     boost::asio::io_context io;
     bp::async_pipe iso(io), ise(io);
@@ -45,23 +46,20 @@ std::vector<uint8_t> az::media::pen_op_to_video(
             "-s", fmt::format("{}x{}", param.frame_width, param.frame_height).data(),
             "-pix_fmt", "rgba",
             "-i", "-",
-            "-c:v", "libx26",
+            "-c:v", "libx265",
             "-r", "24",
-//            "-movflags", "frag_keyframe+empty_moov",
+            "-movflags", "frag_keyframe+empty_moov",
             "-f", "mp4",
-//            "-loglevel", "error",
-//            "-",
-            "/tmp/1/my_output.mp4",
+            "-loglevel", "error",
+            "-",
     }};
 
     bp::opstream cp_in;
-
     bp::child cp(
-            bp::group{}, bp::search_path(task.cmd), bp::args(task.args),
-//            bp::std_in = cp_in,
-//            bp::std_out > iso,
-//            bp::std_err > ise
-            bp::std_in = cp_in
+            group, bp::search_path(task.cmd), bp::args(task.args),
+            bp::std_in = cp_in,
+            bp::std_out > iso,
+            bp::std_err > ise
     );
 
     std::function<void()> stream_pump;
@@ -82,6 +80,7 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     render_with_skia(data, param, [&](
             const SkBitmap &bitmap, std::string_view action
     ) {
+        if ("bitmap" == action) { return; }
         skia_resize(canvas, bitmap, param);
         cp_in.write((char *) bitmap.getPixels(), sizeof(uint8_t) * param.frame_width * param.frame_height * 4);
     });
