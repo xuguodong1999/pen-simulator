@@ -27,13 +27,20 @@ TEST(test_media, video_gen) {
         return hw_reader.select(label);
     };
     auto pen_op = SynthesisTexGenerator::generate_next(
-            "1+1=2",
+            R"(\displaylines {
+1+1=2 \\
+1+1=2 \\
+1+1=2 \\
+1+1=2 \\
+1+1=2 \\
+1+1=2 \\
+})",
             shape_provider
     );
     ScalarType width = 64, height = 64;
     static const size_t MAX_RENDER_SIZE = 8192;
     static const az::ScalarType IDEAL_ITEM_SIZE = 88;
-    static const az::ScalarType STROKE_WIDTH = 3.;
+    static const az::ScalarType STROKE_WIDTH = 5.;
     static const az::ScalarType BLANK_PADDING_RATIO = 1.2;
     if (auto pen_graph = std::dynamic_pointer_cast<PenGraph>(pen_op)) {
         auto size = pen_graph->adjust_size_for_rendering(
@@ -60,12 +67,14 @@ TEST(test_media, video_gen) {
             .render_width=render_width,
             .render_height=render_height,
             .stroke_width=STROKE_WIDTH,
-            .frame_width=frame_width < 0 ? render_width : frame_width,
-            .frame_height=frame_height < 0 ? render_height : frame_height,
+            .frame_width=frame_width,
+            .frame_height=frame_height,
             .stroke_color=0xFFFFFFFF,
             .bg_color=0xFF000000,
     });
-    std::ofstream out("/mnt/d/TEMP/1/my_output.mp4", std::ios::out | std::ios::binary);
+//    std::ofstream out("/mnt/d/TEMP/1/my_output.mp4", std::ios::out | std::ios::binary);
+    std::ofstream out("/tmp/1/my_output.mp4", std::ios::out | std::ios::binary);
+//    std::ofstream out("/tmp/1/my_output.mkv", std::ios::out | std::ios::binary);
     out.write((char *) buffer.data(), buffer.size());
     out.close();
 }
