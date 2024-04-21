@@ -1,3 +1,4 @@
+add_subdirectory(alkanes_cli)
 if (XGD_USE_QT)
     add_subdirectory(az_data_cli)
 endif ()
