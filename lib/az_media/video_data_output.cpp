@@ -83,7 +83,12 @@ std::vector<uint8_t> az::media::pen_op_to_video(
     } else {
         std::ostringstream out;
         out << cp_out.rdbuf();
+#ifdef __clang__
+        std::string out_str = out.str();
+        std::copy(out_str.begin(), out_str.end(), std::back_inserter(buffer));
+#else
         std::copy(out.view().begin(), out.view().end(), std::back_inserter(buffer));
+#endif
         return buffer;
     }
 }
