@@ -11,5 +11,6 @@ xgd_link_libraries(
         PRIVATE
         spdlog
         taskflow
+        boost_iostreams
         boost_unordered
 )

@@ -1,9 +1,16 @@
 #include "az/math/alkane_isomer.h"
 #include "az/core/utils.h"
+#include "boost/iostreams/device/file.hpp"
 
 #include <spdlog/spdlog.h>
 
 #include <taskflow/taskflow.hpp>
+
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/copy.hpp>
 #include <boost/unordered/concurrent_flat_set.hpp>
 
 #include <unordered_set>
@@ -304,7 +311,8 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
         g.push_back(0, 1);
         return {g.hash()};
     }
-    std::vector<SmiHashType> smi_list, last_smi_list = {FastGraph::GetInstance().hash()};
+    std::vector<SmiHashType> smi_list;
+    std::vector<SmiHashType> last_smi_list = {FastGraph::GetInstance().hash()};
     for (int8_t i = 2; i <= count; i++) {
 #ifdef PRINT_TIME_COST
         const auto beg = std::chrono::high_resolution_clock::now();
@@ -319,6 +327,60 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
         smi_list = {};
     }
     return last_smi_list;
+}
+
+// FIXME: figure out count+1 issue
+void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path) {
+    if (!std::filesystem::exists(path)) {
+        throw std::runtime_error(fmt::format("{} is not an existing directory", path));
+    }
+    int8_t beg = 1;
+    std::string directory{path};
+    if (directory.ends_with(fs::path::preferred_separator)) {
+        directory += fs::path::preferred_separator;
+    }
+    while (fs::exists(directory + fmt::format("{}.dat.gz", beg))) {
+        beg++;
+    }
+    std::vector<SmiHashType> smi_list;
+    std::vector<SmiHashType> last_smi_list;
+    namespace bi = boost::iostreams;
+    bi::filtering_istream in;
+    in.push(bi::gzip_decompressor());
+    bi::filtering_ostream out;
+    out.push(bi::gzip_compressor(9));
+    // now beg point to a missing dat file
+    for (int8_t i = beg; i <= count; i++) {
+        if (1 == i) {
+            FastGraph g;
+            last_smi_list = {g.hash()};
+        } else {
+            in.push(bi::file_source(
+                    directory + fmt::format("{}.dat.gz", i - 1)), std::ios_base::in | std::ios_base::binary);
+            size_t last_count = 0;
+            in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
+            last_smi_list.reserve(last_count);
+            last_smi_list.resize(last_count);
+            in.read(reinterpret_cast<char *>(last_smi_list.data()), sizeof(SmiHashType) * last_smi_list.size());
+            in.pop();
+        }
+#ifdef PRINT_TIME_COST
+        const auto beg = std::chrono::high_resolution_clock::now();
+#endif
+        smi_list = get_next_isomers(last_smi_list);
+#ifdef PRINT_TIME_COST
+        const auto end = std::chrono::high_resolution_clock::now();
+        SPDLOG_INFO("({}) cost {:.3f} ms", i,
+                    std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() / 1000.f);
+#endif
+        std::ofstream out_stream(
+                directory + fmt::format("{}.dat.gz", i), std::ios_base::out | std::ios_base::binary);
+        out.push(out_stream);
+        size_t count = smi_list.size();
+        out.write(reinterpret_cast<char *>(&count), sizeof(size_t));
+        out.write(reinterpret_cast<const char *>(smi_list.data()), sizeof(SmiHashType) * smi_list.size());
+        out.pop();
+    }
 }
 
 LabelType AlkaneIsomerUtil::hash_to_smi(SmiHashType smi_hash) {

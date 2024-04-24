@@ -3,6 +3,7 @@
 #include "az/math/alkane_isomer.h"
 
 #include <boost/program_options.hpp>
+#include <boost/numeric/conversion/cast.hpp>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/fmt/ostr.h>
@@ -25,8 +26,7 @@ int main(int argc, char **argv) {
     az::core::setup_spdlog();
     po::options_description desc(R"(
 ---------------------------------------------------------------------------
-az-data-cli is a visualization tool for svg and handwriting data synthesis.
-az-data-cli supports trace of svg paths and handwriting points.
+alkanes-cli is a cli tool for dumping n-carbon isomers into disk.
 ---------------------------------------------------------------------------
 Usage)", 120);
     add_help_info(desc);
@@ -38,41 +38,23 @@ Usage)", 120);
         SPDLOG_INFO(desc);
         return EXIT_SUCCESS;
     }
+    const auto n = vm.at("n").as<int64_t>();
+    const auto output_path = vm.at("output").as<std::string>();
+    const int64_t n_limit = sizeof(az::math::SmiHashType) * 8 / 2;
+    if (n > n_limit || n < 1) {
+        SPDLOG_ERROR("num of carbon {} exceed limit of [{}, {}]", n, 1, n_limit);
+        return EXIT_FAILURE;
+    }
+//    az::math::AlkaneIsomerUtil::get_isomers_sync(boost::numeric_cast<int8_t>(n));
+    az::math::AlkaneIsomerUtil::dump_isomers_sync(boost::numeric_cast<int8_t>(n), output_path);
     return EXIT_SUCCESS;
 }
 
 void add_help_info(po::options_description &desc) {
     desc.add_options()
             ("help,h", "print usage of az-data-cli")
-            ("couch", po::value<std::string>()->default_value("Couch"),
-             R"(path to SCUT_IRAC/Couch dataset.
-see www.hcii-lab.net/data/scutcouch/cn/download.html
-----------------------------------------------------
-SCUT_IRAC
-└── Couch (point to this directory)
-    ├── Couch_Digit_195
-    ├── Couch_GB1_188
-    ├── Couch_GB2_195
-    ├── Couch_Letter_195
-    └── Couch_Symbol_130
-)")
-            ("makemeahanzi", po::value<std::string>()->default_value("graphics.txt"),
-             R"(path to makemeahanzi graphics.txt.
-see https://github.com/skishore/makemeahanzi
---------------------------------------------
-makemeahanzi
-└── graphics.txt (point to this file)
-)")
-            ("input", po::value<std::string>()->default_value("example.json"),
-             "path to a json file containing inputs,  \nsee apps/az_data_cli/example.json for usage")
-            ("output", po::value<std::string>()->default_value(""),
-             "path to output frames directory, \ndisplay with opencv highgui if left empty")
-            ("threads", po::value<size_t>()->default_value(8),
-             "when output is specified, run in parallel")
-            ("limit", po::value<size_t>()->default_value(std::numeric_limits<size_t>::max()),
-             "if samples in json exceed limit, break generation")
-            ("multiply", po::value<int>()->default_value(0),
-             "if > 0, ignore input and display number multiply examples")
-            ("isomer", po::value<int>()->default_value(0),
-             "ignore input and display alkane isomer examples");
+            ("n,n", po::value<int64_t>()->default_value(10),
+             "indicate the N for n-carbon isomers")
+            ("output,o", po::value<std::string>()->default_value("./"),
+             "path to a directory, \nwhere we store alkane isomers");
 }

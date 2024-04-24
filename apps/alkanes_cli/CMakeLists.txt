@@ -12,4 +12,5 @@ xgd_link_libraries(
         AzMath
         spdlog
         boost_program_options
+        boost_numeric_conversion
 )
