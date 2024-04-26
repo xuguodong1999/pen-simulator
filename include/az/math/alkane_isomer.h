@@ -14,7 +14,7 @@ namespace az::math {
          */
         static std::vector<SmiHashType> get_isomers_sync(int8_t count);
 
-        static void dump_isomers_sync(int8_t count, std::string_view path);
+        static void dump_isomers_sync(int8_t count, std::string_view path, size_t thread_num = 0);
 
         static LabelType hash_to_smi(SmiHashType smi_hash);
 

@@ -46,13 +46,16 @@ Usage)", 120);
         return EXIT_FAILURE;
     }
 //    az::math::AlkaneIsomerUtil::get_isomers_sync(boost::numeric_cast<int8_t>(n));
-    az::math::AlkaneIsomerUtil::dump_isomers_sync(boost::numeric_cast<int8_t>(n), output_path);
+    az::math::AlkaneIsomerUtil::dump_isomers_sync(
+            boost::numeric_cast<int8_t>(n), output_path, vm.at("threads").as<size_t>());
     return EXIT_SUCCESS;
 }
 
 void add_help_info(po::options_description &desc) {
     desc.add_options()
             ("help,h", "print usage of az-data-cli")
+            ("threads,t", po::value<size_t>()->default_value(0),
+             "specify parallel num, auto detect if set to zero")
             ("n,n", po::value<int64_t>()->default_value(10),
              "indicate the N for n-carbon isomers")
             ("output,o", po::value<std::string>()->default_value("./"),

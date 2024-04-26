@@ -9,7 +9,7 @@
 #include <boost/iostreams/device/array.hpp>
 #include <boost/iostreams/device/back_inserter.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/zstd.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/unordered/concurrent_flat_set.hpp>
 
@@ -25,6 +25,13 @@ using namespace az;
 using namespace az::math;
 
 #define PRINT_TIME_COST
+//#define XGD_DO_COMPRESSION
+
+#ifdef XGD_DO_COMPRESSION
+static const char *DAT_SUFFIX = ".dat.zst";
+#else
+static const char *DAT_SUFFIX = ".dat";
+#endif
 
 namespace az::math::impl {
     template<typename T>
@@ -35,14 +42,29 @@ namespace az::math::impl {
             p.insert(t);
         }
 
-        std::vector<T> to_vector() {
+        std::vector<T> to_vector() const {
             std::vector<T> out;
             out.reserve(p.size());
             p.visit_all([&](auto &&x) {
                 out.emplace_back(x);
             });
+            std::sort(out.begin(), out.end());
             return out;
         }
+
+        void visit_all(const std::function<void(const T &)> &on_element) const {
+            p.visit_all([&](auto &&x) {
+                on_element(x);
+            });
+        }
+
+        size_t size() const {
+            return p.size();
+        }
+
+        void reserve(size_t n) { p.reserve(n); }
+
+        void max_load_factor(float z) { p.max_load_factor(z); }
     };
 
     template<typename T, typename HashType, typename NodeType> requires
@@ -329,57 +351,109 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
     return last_smi_list;
 }
 
-// FIXME: figure out count+1 issue
-void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path) {
+void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, size_t thread_num) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("{} is not an existing directory", path));
     }
-    int8_t beg = 1;
+    int8_t start = 0;
     std::string directory{path};
-    if (directory.ends_with(fs::path::preferred_separator)) {
+    if (!directory.ends_with(fs::path::preferred_separator)) {
         directory += fs::path::preferred_separator;
     }
-    while (fs::exists(directory + fmt::format("{}.dat.gz", beg))) {
-        beg++;
+    SPDLOG_INFO("directory={}", directory);
+    while (fs::exists(directory + fmt::format("{}{}", start + 1, DAT_SUFFIX))) {
+        start++;
     }
-    std::vector<SmiHashType> smi_list;
-    std::vector<SmiHashType> last_smi_list;
+
+    std::vector<SmiHashType> smi_chunk;
+
     namespace bi = boost::iostreams;
     bi::filtering_istream in;
-    in.push(bi::gzip_decompressor());
     bi::filtering_ostream out;
-    out.push(bi::gzip_compressor(9));
-    // now beg point to a missing dat file
-    for (int8_t i = beg; i <= count; i++) {
-        if (1 == i) {
-            FastGraph g;
-            last_smi_list = {g.hash()};
-        } else {
-            in.push(bi::file_source(
-                    directory + fmt::format("{}.dat.gz", i - 1)), std::ios_base::in | std::ios_base::binary);
-            size_t last_count = 0;
-            in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
-            last_smi_list.reserve(last_count);
-            last_smi_list.resize(last_count);
-            in.read(reinterpret_cast<char *>(last_smi_list.data()), sizeof(SmiHashType) * last_smi_list.size());
-            in.pop();
-        }
-#ifdef PRINT_TIME_COST
-        const auto beg = std::chrono::high_resolution_clock::now();
+#ifdef XGD_DO_COMPRESSION
+    in.push(bi::zstd_decompressor());
+    out.push(bi::zstd_compressor(bi::zstd_params(bi::zstd::best_compression)));
 #endif
-        smi_list = get_next_isomers(last_smi_list);
-#ifdef PRINT_TIME_COST
-        const auto end = std::chrono::high_resolution_clock::now();
-        SPDLOG_INFO("({}) cost {:.3f} ms", i,
-                    std::chrono::duration_cast<std::chrono::microseconds>(end - beg).count() / 1000.f);
-#endif
+    if (start == 0) {
+        FastGraph g;
+        smi_chunk = {g.hash()};
         std::ofstream out_stream(
-                directory + fmt::format("{}.dat.gz", i), std::ios_base::out | std::ios_base::binary);
+                directory + fmt::format("{}{}", 1, DAT_SUFFIX), std::ios_base::out | std::ios_base::binary);
         out.push(out_stream);
-        size_t count = smi_list.size();
-        out.write(reinterpret_cast<char *>(&count), sizeof(size_t));
-        out.write(reinterpret_cast<const char *>(smi_list.data()), sizeof(SmiHashType) * smi_list.size());
+        size_t isomer_count = smi_chunk.size();
+        out.write(reinterpret_cast<char *>(&isomer_count), sizeof(size_t));
+        out.write(reinterpret_cast<const char *>(smi_chunk.data()), sizeof(SmiHashType) * isomer_count);
         out.pop();
+        start++;
+    }
+    static const std::array<size_t, 33> ground_truth = {
+            0, // skip c-0
+            1, 1, 1, 2,
+            3, 5, 9, 18,
+            35, 75, 159, 355,
+            802, 1858, 4347, 10359,
+            24894, 60523, 148284, 366319,
+            910726, 2278658, 5731580, 14490245,
+            36797588, 93839412, 240215803, 617105614,
+            1590507121, 4111846763, 10660307791, 27711253769,
+    };
+    // now start+1 point to a missing dat file
+    for (int8_t n = start + 1; n <= count; n++) {
+        in.push(bi::file_source(
+                directory + fmt::format("{}{}", n - 1, DAT_SUFFIX)), std::ios_base::in | std::ios_base::binary);
+        size_t last_count = 0;
+        in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
+
+        HashSet global_set;
+        const float factor = 2.6;
+        global_set.reserve(last_count * factor);
+        global_set.max_load_factor(factor); // actually not work for flat map
+        const size_t chunk_max_size = 1024 * 1024 * 100; // 100M
+        for (size_t k = 0; k < std::ceil(1. * last_count / chunk_max_size); k++) {
+            size_t chunk_begin = k * chunk_max_size;
+            if (global_set.size() == ground_truth[n]) {
+                SPDLOG_INFO("early stop by ratio {}", 1.0 * chunk_begin / last_count);
+                break;
+            }
+            size_t chunk_end = (std::min)((k + 1) * chunk_max_size, last_count);
+            size_t chunk_size = chunk_end - chunk_begin;
+            smi_chunk.reserve(chunk_size);
+            smi_chunk.resize(chunk_size);
+            in.read(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
+
+            tf::Taskflow taskflow;
+            if (0 == thread_num) {
+                thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
+            }
+            taskflow.for_each_index(size_t{0}, smi_chunk.size(), size_t{1}, [&](size_t i) {
+                FastGraph mol;
+                mol.from_hash(smi_chunk[i]);
+                size_t total = mol.size();
+                for (size_t j = 0; j < total; j++) {
+                    auto &node = mol.at(j);
+                    if (node.size() < 4) {
+                        mol.add_do_del(j, total, [&]() {
+                            auto smi = mol.hash();
+                            global_set.insert(smi);
+                        });
+                    }
+                }
+            });
+            tf::Executor(thread_num).run(taskflow).get();
+        }
+        in.pop();
+
+        std::ofstream out_stream(
+                directory + fmt::format("{}{}", n, DAT_SUFFIX), std::ios_base::out | std::ios_base::binary);
+        out.push(out_stream);
+        size_t isomer_count = global_set.size();
+        SPDLOG_INFO("alkanes {} count {}", n, isomer_count);
+        out.write(reinterpret_cast<char *>(&isomer_count), sizeof(size_t));
+        global_set.visit_all([&out](auto &&x) {
+            out.write(reinterpret_cast<const char *>(&x), sizeof(SmiHashType) * 1);
+        });
+        out.pop();
+        SPDLOG_INFO("alkanes {} generation done", n);
     }
 }
 

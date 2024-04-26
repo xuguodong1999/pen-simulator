@@ -14,3 +14,7 @@ xgd_link_libraries(
         boost_program_options
         boost_numeric_conversion
 )
+
+if (EMSCRIPTEN)
+    xgd_emcc_link_rawfs_net(${PROJECT_NAME})
+endif ()

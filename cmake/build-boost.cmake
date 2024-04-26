@@ -346,7 +346,7 @@ xgd_internal_build_boost(graph)
 
 xgd_internal_build_boost(
         iostreams
-        SRC_FILES file_descriptor.cpp gzip.cpp mapped_file.cpp zlib.cpp
+        SRC_FILES file_descriptor.cpp gzip.cpp mapped_file.cpp zlib.cpp zstd.cpp
 )
 xgd_link_libraries(boost_iostreams PRIVATE zlib zstd)
 

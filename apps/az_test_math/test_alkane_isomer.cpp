@@ -3,6 +3,9 @@
 
 #include <gtest/gtest.h>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/fmt/ostr.h>
+
 #include <vector>
 
 TEST(test_math, polya_algorithm) {
@@ -14,6 +17,31 @@ TEST(test_math, polya_algorithm) {
         auto [a, r] = counter.count_alkane_radical(i);
         EXPECT_EQ(a, alkanes[i]);
         EXPECT_EQ(r, radicals[i]);
+    }
+}
+
+TEST(test_math, print_isomer_size_into_array) {
+    az::math::PolyaIsomerCounter counter;
+    for (int i = 1; i <= 32; i++) {
+        auto [a, r] = counter.count_alkane_radical(i);
+        std::cerr << a << ",";
+    }
+}
+
+TEST(test_math, count_isomer_size) {
+    az::math::PolyaIsomerCounter counter;
+    double last_count = 1;
+    for (int i = 1; i <= 32; i++) {
+        auto [a, r] = counter.count_alkane_radical(i);
+        double byte_n = a.convert_to<double>() * sizeof(az::math::SmiHashType);
+//        const double stage = 1000;
+        const double stage = 1024;
+        SPDLOG_INFO("alkanes {} count {} about {} {} with factor {}", i, a,
+                    byte_n > stage * stage ? byte_n / stage / stage : byte_n > stage ? byte_n / stage : byte_n,
+                    byte_n > stage * stage ? "MB" : byte_n > stage ? "KB" : "B",
+                    a.convert_to<double>() / last_count
+        );
+        last_count = a.convert_to<double>();
     }
 }
 
