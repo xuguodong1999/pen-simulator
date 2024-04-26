@@ -1,4 +1,6 @@
 #include "az/math/alkane_isomer.h"
+#include "az/math/alkane_isomer_counter.h"
+
 #include "az/core/utils.h"
 #include "boost/iostreams/device/file.hpp"
 
@@ -386,7 +388,7 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
         out.pop();
         start++;
     }
-    static const std::array<size_t, 33> ground_truth = {
+    static const std::array<BIntType, 33> ground_truth = {
             0, // skip c-0
             1, 1, 1, 2,
             3, 5, 9, 18,
