@@ -394,6 +394,49 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
     return last_smi_list;
 }
 
+void AlkaneIsomerUtil::compress_isomers(std::string_view path) {
+    if (!std::filesystem::exists(path)) {
+        throw std::runtime_error(fmt::format("{} is not an existing directory", path));
+    }
+    int8_t end = 0;
+    std::string directory{path};
+    if (!directory.ends_with(fs::path::preferred_separator)) {
+        directory += fs::path::preferred_separator;
+    }
+    SPDLOG_INFO("directory={}", directory);
+    while (fs::exists(directory + fmt::format("{}{}", end + 1, ".dat"))) {
+        end++;
+    }
+    tf::Taskflow taskflow;
+    const size_t thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
+    end += 1; // end-1 should exist
+    taskflow.for_each_index(int8_t{1}, end, int8_t{1}, [&](int8_t i) {
+        namespace bi = boost::iostreams;
+        bi::filtering_istream in;
+        bi::filtering_ostream out;
+        out.push(bi::zstd_compressor(bi::zstd_params(bi::zstd::best_compression)));
+        const int8_t n = i;
+        in.push(bi::file_source(
+                directory + fmt::format("{}{}", n, ".dat")), std::ios_base::in | std::ios_base::binary);
+        size_t chunk_size = 0;
+        in.read(reinterpret_cast<char *>(&chunk_size), sizeof(size_t));
+        std::vector<SmiHashType> smi_chunk;
+        smi_chunk.reserve(chunk_size);
+        smi_chunk.resize(chunk_size);
+        in.read(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
+        in.pop();
+        std::sort(smi_chunk.begin(), smi_chunk.end());
+
+        std::ofstream out_stream(
+                directory + fmt::format("{}{}", n, ".dat.zst"), std::ios_base::out | std::ios_base::binary);
+        out.push(out_stream);
+        out.write(reinterpret_cast<char *>(&chunk_size), sizeof(size_t));
+        out.write(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
+        out.pop();
+    });
+    tf::Executor(thread_num).run(taskflow).get();
+}
+
 void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, size_t thread_num) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("{} is not an existing directory", path));

@@ -1,5 +1,6 @@
 #include "az/math/alkane_isomer_counter.h"
 #include "az/math/alkane_isomer.h"
+#include "az/core/utils.h"
 
 #include <gtest/gtest.h>
 
@@ -14,7 +15,7 @@ TEST(test_math, polya_algorithm) {
     std::vector<uint64_t> radicals = {0, 1, 1, 2, 4, 8, 17, 39, 89, 211};
     az::math::PolyaIsomerCounter counter;
     for (int i = 1; i < 10; i++) {
-        auto [a, r] = counter.count_alkane_radical(i);
+        auto[a, r] = counter.count_alkane_radical(i);
         EXPECT_EQ(a, alkanes[i]);
         EXPECT_EQ(r, radicals[i]);
     }
@@ -23,7 +24,7 @@ TEST(test_math, polya_algorithm) {
 TEST(test_math, print_isomer_size_into_array) {
     az::math::PolyaIsomerCounter counter;
     for (int i = 1; i <= 32; i++) {
-        auto [a, r] = counter.count_alkane_radical(i);
+        auto[a, r] = counter.count_alkane_radical(i);
         std::cerr << a << ",";
     }
 }
@@ -32,7 +33,7 @@ TEST(test_math, count_isomer_size) {
     az::math::PolyaIsomerCounter counter;
     double last_count = 1;
     for (int i = 1; i <= 32; i++) {
-        auto [a, r] = counter.count_alkane_radical(i);
+        auto[a, r] = counter.count_alkane_radical(i);
         double byte_n = a.convert_to<double>() * sizeof(az::math::SmiHashType);
 //        const double stage = 1000;
         const double stage = 1024;
@@ -57,7 +58,13 @@ TEST(test_math, greedy_algorithm) {
     for (int8_t i = 1; i <= 20; i++) {
         auto smi_list = az::math::AlkaneIsomerUtil::get_isomers_sync(i);
         auto a_greedy = smi_list.size();
-        auto [a, r] = counter.count_alkane_radical(i);
+        auto[a, r] = counter.count_alkane_radical(i);
         EXPECT_EQ(a, a_greedy);
     }
+}
+
+TEST(test_math, alkane_compression) {
+    az::math::AlkaneIsomerUtil::compress_isomers(
+            az::get_dataset_root("171860633/alkanes-2024-0426")
+    );
 }
