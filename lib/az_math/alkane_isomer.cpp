@@ -28,6 +28,13 @@ using namespace az::math;
 
 #define PRINT_TIME_COST
 //#define XGD_DO_COMPRESSION
+/**
+ * boost unordered flat map has a 2^n (1+15) group layout
+ * there is a gap from (2^29)*16*64/(8*(2^10)^3) = 64G to the next 128G
+ * but we need about 10660307791*64/(8*(2^10)^3) = 79.4G memory for C-31
+ * so we hard-code two hashmap for C-31 generation on 128G-PC
+ */
+//#define XGD_C31_128G_SPEC
 
 #ifdef XGD_DO_COMPRESSION
 static const char *DAT_SUFFIX = ".dat.zst";
@@ -38,16 +45,35 @@ static const char *DAT_SUFFIX = ".dat";
 namespace az::math::impl {
     template<typename T>
     class InsertOnlySet {
-        boost::concurrent_flat_set<T> p;
+        boost::concurrent_flat_set<T> p, p1;
     public:
         void insert(const T &t) {
+#ifdef XGD_C31_128G_SPEC
+            static const T BOUND_1 = std::round(
+                    (1 - 0.072) * 0b11111111111111110000000000000001111111111111110000000000000000);
+            if (t < BOUND_1) {
+                p.insert(t);
+            } else {
+                p1.insert(t);
+            }
+#else
             p.insert(t);
+#endif
         }
+
+#ifdef XGD_C31_128G_SPEC
+
+        void setup_128g() {
+            p.reserve((size_t{1} << 33) - (size_t{1} << 31));
+            p1.reserve((size_t{1} << 32) - (size_t{1} << 30));
+        }
+
+#endif
 
         std::vector<T> to_vector() const {
             std::vector<T> out;
-            out.reserve(p.size());
-            p.visit_all([&](auto &&x) {
+            out.reserve(this->size());
+            this->visit_all([&](auto &&x) {
                 out.emplace_back(x);
             });
             std::sort(out.begin(), out.end());
@@ -58,10 +84,20 @@ namespace az::math::impl {
             p.visit_all([&](auto &&x) {
                 on_element(x);
             });
+#ifdef XGD_C31_128G_SPEC
+            p1.visit_all([&](auto &&x) {
+                on_element(x);
+            });
+#endif
+
         }
 
         size_t size() const {
+#ifdef XGD_C31_128G_SPEC
+            return p.size() + p1.size();
+#else
             return p.size();
+#endif
         }
 
         void reserve(size_t n) { p.reserve(n); }
@@ -342,6 +378,11 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
         const auto beg = std::chrono::high_resolution_clock::now();
 #endif
         smi_list = get_next_isomers(last_smi_list);
+        size_t a = (size_t{1} << 33) - (size_t{1} << 31);
+        size_t b = (size_t{1} << 32) - (size_t{1} << 30);
+        SPDLOG_INFO("cutoff_ratio: {}",
+                    1. * (smi_list.back() - smi_list[std::round(1. * smi_list.size() * a / (a + b))]) /
+                    smi_list.back());
 #ifdef PRINT_TIME_COST
         const auto end = std::chrono::high_resolution_clock::now();
         SPDLOG_INFO("({}) cost {:.3f} ms", i,
@@ -407,9 +448,12 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
         in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
 
         HashSet global_set;
+#ifdef XGD_C31_128G_SPEC
+        global_set.setup_128g();
+#else
         const float factor = 2.6;
         global_set.reserve(last_count * factor);
-        global_set.max_load_factor(factor); // actually not work for flat map
+#endif
         const size_t chunk_max_size = 1024 * 1024 * 100; // 100M
         for (size_t k = 0; k < std::ceil(1. * last_count / chunk_max_size); k++) {
             size_t chunk_begin = k * chunk_max_size;
