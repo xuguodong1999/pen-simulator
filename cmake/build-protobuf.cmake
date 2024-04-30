@@ -17,6 +17,7 @@ xgd_add_library(
         ${utf8_range_DIR}/range2-neon.c
         ${utf8_range_DIR}/range2-sse.c
         ${utf8_range_DIR}/utf8_validity.cc
+        ${utf8_range_DIR}/utf8_range.c
         INCLUDE_DIRS ${INC_DIR}
         PRIVATE_INCLUDE_DIRS ${utf8_range_DIR}
         EXCLUDE_REGEXES

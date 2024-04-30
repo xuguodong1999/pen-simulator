@@ -70,8 +70,6 @@ set(CODEC_SRCS_LIMITED
         src/codec/SkJpegSourceMgr.h
         src/codec/SkJpegUtility.cpp
         src/codec/SkJpegUtility.h
-        src/codec/SkMasks.cpp
-        src/codec/SkMasks.h
         src/codec/SkMaskSwizzler.cpp
         src/codec/SkMaskSwizzler.h
         src/codec/SkParseEncodedOrigin.cpp
@@ -87,8 +85,7 @@ set(CODEC_SRCS_LIMITED
         src/codec/SkTiffUtility.cpp
         src/codec/SkWbmpCodec.cpp
         src/codec/SkWbmpCodec.h
-        src/codec/SkWuffsCodec.cpp
-        src/codec/SkWuffsCodec.h)
+        src/codec/SkWuffsCodec.cpp)
 
 set(CODEC_SRCS_ALL ${CODEC_SRCS_LIMITED}
         src/codec/SkIcoCodec.cpp
@@ -140,6 +137,8 @@ set(base_gl_srcs
         src/gpu/ganesh/gl/GrGLDefines.h
         src/gpu/ganesh/gl/GrGLDirectContext.cpp
         src/gpu/ganesh/gl/GrGLExtensions.cpp
+        src/gpu/ganesh/gl/GrGLFinishCallbacks.cpp
+        src/gpu/ganesh/gl/GrGLFinishCallbacks.h
         src/gpu/ganesh/gl/GrGLGLSL.cpp
         src/gpu/ganesh/gl/GrGLGLSL.h
         src/gpu/ganesh/gl/GrGLGpu.cpp
@@ -182,7 +181,6 @@ set(GL_SRCS_UNIX_EGL ${base_gl_srcs}
         src/gpu/ganesh/gl/egl/GrGLMakeNativeInterface_egl.cpp)
 
 set(PORTS_SRCS_WIN
-        src/ports/SkFontMgr_win_dw_factory.cpp
         src/fonts/SkFontMgr_indirect.cpp
         src/ports/SkFontMgr_win_dw.cpp
         src/ports/SkScalerContext_win_dw.cpp
@@ -211,11 +209,7 @@ set(PORTS_SRCS_UNIX
 )
 if (XGD_USE_FONTCONFIG)
     list(APPEND PORTS_SRCS_UNIX
-            src/ports/SkFontMgr_fontconfig_factory.cpp
             src/ports/SkFontMgr_fontconfig.cpp)
-else ()
-    list(APPEND PORTS_SRCS_UNIX
-            src/ports/SkFontMgr_empty_factory.cpp)
 endif ()
 
 set(GL_SRCS_ANDROID ${base_gl_srcs}
@@ -243,8 +237,9 @@ set(PORTS_SRCS_ANDROID
         src/ports/SkOSLibrary_posix.cpp)
 
 set(PORTS_SRCS_ANDROID_NO_FONT
+        src/gpu/android/AHardwareBufferUtils.cpp
+        src/gpu/graphite/surface/Surface_AndroidFactories.cpp
         src/ports/SkDebug_android.cpp
-        src/ports/SkFontMgr_empty_factory.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
@@ -259,7 +254,6 @@ set(PORTS_SRCS_IOS
         src/ports/SkDebug_stdio.cpp
         src/ports/SkFontMgr_custom.h
         src/ports/SkFontMgr_mac_ct.cpp
-        src/ports/SkFontMgr_mac_ct_factory.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkImageGeneratorCG.cpp
         src/ports/SkMemory_malloc.cpp
@@ -286,7 +280,6 @@ set(PORTS_SRCS_FUCHSIA
         src/ports/SkFontHost_FreeType.cpp
         src/ports/SkFontMgr_custom.cpp
         src/ports/SkFontMgr_custom.h
-        src/ports/SkFontMgr_empty_factory.cpp
         src/ports/SkFontMgr_fuchsia.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
@@ -308,7 +301,6 @@ set(PORTS_SRCS_WASM
         src/ports/SkFontMgr_custom.cpp
         src/ports/SkFontMgr_custom.h
         src/ports/SkFontMgr_custom_embedded.cpp
-        src/ports/SkFontMgr_empty_factory.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
@@ -550,7 +542,7 @@ set(SKIA_SRC_DIRS
         ${SRC_DIR}/image
         ${SRC_DIR}/opts
         ${SRC_DIR}/pathops
-        ${SRC_DIR}/pdf
+#        ${SRC_DIR}/pdf  # disable skia pdf due to its dependency on jpeg decoder
         ${SRC_DIR}/sfnt
         ${SRC_DIR}/shaders
         ${SRC_DIR}/shaders/gradients

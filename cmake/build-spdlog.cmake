@@ -11,8 +11,8 @@ target_compile_definitions(spdlog PUBLIC SPDLOG_COMPILED_LIB)
 if (BUILD_SHARED_LIBS)
     target_compile_definitions(
             spdlog
-            PRIVATE SPDLOG_SHARED_LIB FMT_EXPORT
-            PUBLIC FMT_SHARED
+            PRIVATE FMT_EXPORT
+            PUBLIC FMT_SHARED SPDLOG_SHARED_LIB
     )
 endif ()
 xgd_link_threads(spdlog)

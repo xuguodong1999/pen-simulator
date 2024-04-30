@@ -560,7 +560,16 @@ function(xgd_build_opencv_gapi)
             SRC_FILES
             ${OPENCV_MODULE_${the_module}_SOURCES_DISPATCHED}
     )
-    xgd_link_libraries(opencv_gapi PRIVATE ade)
+    set(VASOT_ROOT_DIR ${OCV_MODULE_DIR}/${OCV_COMPONENT}/src/3rdparty/vasot)
+    xgd_add_library(opencv_gapi_vasot STATIC
+            SRC_DIRS
+            ${VASOT_ROOT_DIR}/src/components/ot
+            ${VASOT_ROOT_DIR}/src/components/ot/kalman_filter
+            ${VASOT_ROOT_DIR}/src/components/ot/mtt
+            INCLUDE_DIRS ${VASOT_ROOT_DIR}/include
+    )
+    xgd_link_libraries(opencv_gapi_vasot PRIVATE opencv_core)
+    xgd_link_libraries(opencv_gapi PRIVATE ade opencv_gapi_vasot)
     if (WIN32)
         target_link_libraries(opencv_gapi PRIVATE wsock32 ws2_32)
     endif ()
@@ -573,11 +582,14 @@ xgd_build_opencv_gapi()
 function(xgd_build_opencv_dnn)
     set(OCV_COMPONENT dnn)
     set(the_module opencv_${OCV_COMPONENT})
-    ocv_add_dispatched_file_force_all(layers/layers_common AVX AVX2 AVX512_SKX RVV LASX)
-    ocv_add_dispatched_file_force_all(int8layers/layers_common AVX2 AVX512_SKX LASX)
-    ocv_add_dispatched_file_force_all(layers/cpu_kernels/conv_block AVX AVX2)
-    ocv_add_dispatched_file_force_all(layers/cpu_kernels/conv_depthwise AVX AVX2 RVV LASX)
-    ocv_add_dispatched_file_force_all(layers/cpu_kernels/conv_winograd_f63 AVX AVX2)
+
+    ocv_add_dispatched_file_force_all("layers/layers_common" AVX AVX2 AVX512_SKX RVV LASX)
+    ocv_add_dispatched_file_force_all("int8layers/layers_common" AVX2 AVX512_SKX LASX)
+    ocv_add_dispatched_file_force_all("layers/cpu_kernels/conv_block" AVX AVX2 NEON NEON_FP16)
+    ocv_add_dispatched_file_force_all("layers/cpu_kernels/conv_depthwise" AVX AVX2 RVV LASX)
+    ocv_add_dispatched_file_force_all("layers/cpu_kernels/conv_winograd_f63" AVX AVX2 NEON_FP16)
+    ocv_add_dispatched_file_force_all("layers/cpu_kernels/fast_gemm_kernels" AVX AVX2 NEON LASX)
+
     xgd_internal_build_opencv(
             dnn
             SRC_DIRS

@@ -155,7 +155,7 @@ TEST(test_tex, parse_mathjax_svg_json_graph) {
                 SPDLOG_INFO("draw label {} as {}", label_hex, label);
                 SkFont font;
                 {
-                    auto tf = SkFontMgr::RefDefault()->matchFamilyStyleCharacter(
+                    auto tf = SkFontMgr::RefEmpty()->matchFamilyStyleCharacter(
                             nullptr, SkFontStyle{}, nullptr, 0, SkUnichar{label_buf});
                     if (tf) {
                         font.setTypeface(tf);

@@ -59,10 +59,10 @@ SkPaint az::media::skia::create_paint(const SkColor &color, const float &stroke_
 SkFont az::media::skia::create_font(const UCharType &label) {
     SkFont font;
     auto label_buf = az::js::QjsWrapper::convert_unicode_str_to_buffer(label);
-    auto tf = SkFontMgr::RefDefault()->matchFamilyStyleCharacter(
+    auto tf = SkFontMgr::RefEmpty()->matchFamilyStyleCharacter(
             "Noto Color Emoji", SkFontStyle{}, nullptr, 0, SkUnichar{label_buf});
     if (!tf) {
-        tf = SkFontMgr::RefDefault()->matchFamilyStyleCharacter(
+        tf = SkFontMgr::RefEmpty()->matchFamilyStyleCharacter(
                 nullptr, SkFontStyle{}, nullptr, 0, SkUnichar{label_buf});
     }
     if (tf) {

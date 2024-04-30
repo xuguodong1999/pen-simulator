@@ -108,6 +108,16 @@ function(xgd_build_boost_atomic)
     target_compile_definitions(boost_atomic PRIVATE BOOST_ATOMIC_SOURCE)
 endfunction()
 
+function(xgd_build_boost_charconv)
+    set(BOOST_SRC_DIR ${XGD_THIRD_PARTY_DIR}/boost-src/boost/libs)
+    set(BOOST_CHARCONV_SRC_FILES from_chars.cpp to_chars.cpp)
+    xgd_internal_build_boost(charconv SRC_FILES ${BOOST_CHARCONV_SRC_FILES})
+    target_compile_definitions(boost_atomic
+            PUBLIC BOOST_CHARCONV_NO_QUADMATH
+            PRIVATE BOOST_CHARCONV_SOURCE
+    )
+endfunction()
+
 function(xgd_build_boost_cobalt)
     set(BOOST_SRC_DIR ${XGD_THIRD_PARTY_DIR}/boost-src/boost/libs)
     set(BOOST_COBALT_SRC_FILES
@@ -311,6 +321,8 @@ xgd_build_boost_atomic()
 
 xgd_build_boost_asio()
 
+xgd_build_boost_charconv()
+
 xgd_build_boost_cobalt()
 
 xgd_internal_build_boost(chrono)
@@ -431,6 +443,7 @@ xgd_create_boost_deps(beast INTERFACE asio assert bind config container core end
 xgd_create_boost_deps(bimap INTERFACE concept_check config container_hash core iterator lambda mpl multi_index
         preprocessor static_assert throw_exception type_traits utility)
 xgd_create_boost_deps(bind INTERFACE config core)
+xgd_create_boost_deps(charconv PUBLIC config assert core)
 xgd_create_boost_deps(chrono PUBLIC assert config core integer move mpl predef ratio static_assert system
         throw_exception type_traits typeof utility winapi)
 xgd_create_boost_deps(circular_buffer INTERFACE assert concept_check config core move static_assert
@@ -465,7 +478,7 @@ xgd_create_boost_deps(dynamic_bitset INTERFACE assert config container_hash core
 xgd_create_boost_deps(endian INTERFACE config core static_assert type_traits)
 xgd_create_boost_deps(exception PUBLIC assert config core smart_ptr throw_exception tuple type_traits)
 xgd_create_boost_deps(fiber INTERFACE assert config context core intrusive predef smart_ptr)
-xgd_create_boost_deps(filesystem PRIVATE predef PUBLIC assert config container_hash core detail
+xgd_create_boost_deps(filesystem PRIVATE core predef scope PUBLIC assert config container_hash detail
         io iterator smart_ptr system type_traits winapi)
 xgd_create_boost_deps(flyweight INTERFACE assert config container_hash core detail interprocess
         mpl multi_index parameter preprocessor smart_ptr throw_exception type_traits)
@@ -505,12 +518,12 @@ xgd_create_boost_deps(iostreams PRIVATE numeric_conversion PUBLIC assert config 
         mpl preprocessor random range regex smart_ptr static_assert throw_exception type_traits utility)
 xgd_create_boost_deps(iterator INTERFACE assert concept_check config conversion core detail function_types fusion
         mpl optional smart_ptr static_assert type_traits utility)
-xgd_create_boost_deps(json PUBLIC align assert config container core describe mp11 system throw_exception)
+xgd_create_boost_deps(json PUBLIC align assert config container core describe endian mp11 system throw_exception)
 xgd_create_boost_deps(lambda INTERFACE bind config core detail iterator mpl preprocessor tuple type_traits utility)
 xgd_create_boost_deps(leaf)
 xgd_create_boost_deps(lexical_cast INTERFACE array assert config container core integer numeric_conversion
         range static_assert throw_exception type_traits)
-xgd_create_boost_deps(local_function INTERFACE config mpl preprocessor scope_exit type_traits typeof utility)
+xgd_create_boost_deps(local_function INTERFACE config mpl preprocessor scope_exit type_traits typeof utility scope)
 xgd_create_boost_deps(locale PRIVATE core predef thread PUBLIC assert config iterator)
 xgd_create_boost_deps(lockfree INTERFACE align array assert atomic config core integer iterator mpl parameter predef
         static_assert tuple type_traits utility)
@@ -573,6 +586,7 @@ xgd_create_boost_deps(ratio INTERFACE config core integer mpl rational static_as
 xgd_create_boost_deps(rational INTERFACE assert config core integer static_assert throw_exception type_traits utility)
 xgd_create_boost_deps(regex INTERFACE config throw_exception predef assert)
 xgd_create_boost_deps(safe_numerics INTERFACE concept_check config core integer logic mp11)
+xgd_create_boost_deps(scope INTERFACE config core type_traits)
 xgd_create_boost_deps(scope_exit INTERFACE config function preprocessor type_traits typeof)
 xgd_create_boost_deps(serialization PRIVATE function PUBLIC array assert config core detail integer io iterator
         move mpl optional predef preprocessor smart_ptr spirit static_assert type_traits unordered utility variant)

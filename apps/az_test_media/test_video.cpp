@@ -53,8 +53,8 @@ TEST(test_media, video_gen) {
         width = 64;
         height = 64;
     }
-    int frame_width = 3840;
-    int frame_height = 2560;
+    int frame_width = 3840 / 4;
+    int frame_height = 2560 / 4;
     int render_width = std::ceil(width);
     int render_height = std::ceil(height);
     if (render_width < frame_width && render_height < frame_height) {

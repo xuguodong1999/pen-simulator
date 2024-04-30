@@ -14,6 +14,7 @@
 #include <boost/iostreams/filter/zstd.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/unordered/concurrent_flat_set.hpp>
+#include <boost/unordered/unordered_flat_set.hpp>
 
 #include <unordered_set>
 #include <iomanip>
@@ -43,32 +44,15 @@ static const char *DAT_SUFFIX = ".dat";
 #endif
 
 namespace az::math::impl {
+#ifndef XGD_C31_128G_SPEC
+
     template<typename T>
     class InsertOnlySet {
         boost::concurrent_flat_set<T> p, p1;
     public:
         void insert(const T &t) {
-#ifdef XGD_C31_128G_SPEC
-            static const T BOUND_1 = std::round(
-                    (1 - 0.072) * 0b11111111111111110000000000000001111111111111110000000000000000);
-            if (t < BOUND_1) {
-                p.insert(t);
-            } else {
-                p1.insert(t);
-            }
-#else
             p.insert(t);
-#endif
         }
-
-#ifdef XGD_C31_128G_SPEC
-
-        void setup_128g() {
-            p.reserve((size_t{1} << 33) - (size_t{1} << 31));
-            p1.reserve((size_t{1} << 32) - (size_t{1} << 30));
-        }
-
-#endif
 
         std::vector<T> to_vector() const {
             std::vector<T> out;
@@ -84,26 +68,73 @@ namespace az::math::impl {
             p.visit_all([&](auto &&x) {
                 on_element(x);
             });
-#ifdef XGD_C31_128G_SPEC
-            p1.visit_all([&](auto &&x) {
-                on_element(x);
-            });
-#endif
-
         }
 
         size_t size() const {
-#ifdef XGD_C31_128G_SPEC
-            return p.size() + p1.size();
-#else
             return p.size();
-#endif
         }
 
         void reserve(size_t n) { p.reserve(n); }
 
         void max_load_factor(float z) { p.max_load_factor(z); }
     };
+
+#else
+
+    template<typename T>
+    class InsertOnlySet {
+        boost::unordered_flat_set<T> p, p1, p2;
+        std::mutex insertion_mutex;
+        size_t bound, bound1;
+    public:
+        void insert(const T &t) {
+            std::unique_lock lk(insertion_mutex);
+            if (p.size() < bound) {
+                p.insert(t);
+            } else {
+                if (p1.size() < bound1) {
+                    p1.insert(t);
+                } else {
+                    p2.insert(t);
+                }
+            }
+        }
+
+        std::vector<T> to_vector() const {
+            std::vector<T> out;
+            out.reserve(this->size());
+            this->visit_all([&](auto &&x) {
+                out.emplace_back(x);
+            });
+            std::sort(out.begin(), out.end());
+            return out;
+        }
+
+        void visit_all(const std::function<void(const T &)> &on_element) const {
+            for (auto &x: p) { on_element(x); }
+            for (auto &x: p1) { on_element(x); }
+            for (auto &x: p2) { on_element(x); }
+        }
+
+        size_t size() const {
+            return p.size() + p1.size() + p2.size();
+        }
+
+        void reserve(size_t n) {
+            SPDLOG_WARN("ignore reserve, use custom setup for 128GB memory");
+            p.reserve((size_t{1} << 33) - (size_t{1} << 31));
+            p1.reserve((size_t{1} << 32) - (size_t{1} << 30));
+            p2.reserve((size_t{1} << 30) - (size_t{1} << 28));
+            bound = p.max_load() - (size_t{1} << 15);
+            bound1 = p1.max_load() - (size_t{1} << 15);
+        }
+
+        void max_load_factor(float z) {
+            SPDLOG_WARN("ignore max_load_factor");
+        }
+    };
+
+#endif
 
     template<typename T, typename HashType, typename NodeType> requires
     std::is_integral_v<T> && std::is_integral_v<HashType> && std::is_integral_v<NodeType>
@@ -491,12 +522,8 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
         in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
 
         HashSet global_set;
-#ifdef XGD_C31_128G_SPEC
-        global_set.setup_128g();
-#else
         const float factor = 2.6;
         global_set.reserve(last_count * factor);
-#endif
         const size_t chunk_max_size = 1024 * 1024 * 100; // 100M
         for (size_t k = 0; k < std::ceil(1. * last_count / chunk_max_size); k++) {
             size_t chunk_begin = k * chunk_max_size;
