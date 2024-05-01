@@ -167,7 +167,7 @@ Usage)", 120);
 
     tf::Taskflow taskflow;
     size_t limit = (std::min)(input_list.size(), vm.at("limit").as<size_t>());
-    taskflow.for_each_index(size_t{0}, limit, size_t{1}, [&](size_t i) {
+    const auto task = [&](size_t i) {
         const auto &[content, source_type, text_type] = input_list[i];
         SPDLOG_INFO("handle [{}][{}]: \n******\n{}\n******", source_type, text_type, content);
         auto pen_op = scheduler(content, source_type, text_type);
@@ -205,8 +205,15 @@ Usage)", 120);
                     1280, 1280
             );
         }
-    });
-    tf::Executor(show_gui ? 1 : vm.at("threads").as<size_t>()).run(taskflow).get();
+    };
+    if (show_gui) {
+        for (size_t i = 0; i < limit; i++) {
+            task(i);
+        }
+    } else {
+        taskflow.for_each_index(size_t{0}, limit, size_t{1}, task);
+        tf::Executor(vm.at("threads").as<size_t>()).run(taskflow).get();
+    }
     return EXIT_SUCCESS;
 }
 
