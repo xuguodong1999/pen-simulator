@@ -5,9 +5,9 @@ xgd_add_library(${PROJECT_NAME}
 xgd_generate_export_header(${PROJECT_NAME} ${PROJECT_NAME} ".h")
 xgd_link_libraries(
         ${PROJECT_NAME}
-        PUBLIC AzCore
+        PUBLIC AzCore AzPen
         PRIVATE
-        AzMath AzData AzPen AzJs
+        AzMath AzData AzJs
         eigen spdlog taskflow skia
         boost_process boost_asio
 )

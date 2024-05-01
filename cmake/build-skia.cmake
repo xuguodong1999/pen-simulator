@@ -598,6 +598,7 @@ xgd_add_library(skia
         INCLUDE_DIRS
         ${ROOT_DIR}
         ${INC_DIR}/core
+        ${INC_DIR}/ports
         ${INC_DIR}/utils
         ${INC_DIR}/effects
         ${INC_DIR}/encode
@@ -620,7 +621,13 @@ if (APPLE)
             ${COREGRAPHICS_LIBRARY}
             ${IMAGEIO_LIBRARY}
     )
+    target_compile_definitions(skia PUBLIC SK_FONTMGR_CORETEXT_AVAILABLE)
 endif ()
+
+if (WIN32)
+    target_compile_definitions(skia PUBLIC SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+endif ()
+
 target_compile_definitions(skia PRIVATE
         SK_CODEC_DECODES_PNG
         # Our legacy G3 rule *always* has the ganesh backend enabled.
@@ -639,6 +646,7 @@ xgd_link_libraries(skia PRIVATE skcms png zlib freetype)
 target_link_libraries(skia PRIVATE $<$<BOOL:${ANDROID}>:log>)
 if (XGD_USE_FONTCONFIG AND UNIX AND NOT ANDROID AND NOT IOS AND NOT EMSCRIPTEN AND NOT APPLE)
     xgd_link_libraries(skia PRIVATE Fontconfig::Fontconfig)
+    target_compile_definitions(skia PUBLIC SK_FONTMGR_FONTCONFIG_AVAILABLE)
 endif ()
 
 function(xgd_build_skia_module_libs MODULE_NAME)

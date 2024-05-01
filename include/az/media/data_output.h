@@ -1,9 +1,13 @@
 #pragma once
 
 #include "az/media/config.h"
-#include "az/pen/pen_op.h"
 
 #include <string>
+#include <vector>
+
+namespace az::pen {
+    class PenOp;
+}
 
 namespace az::media {
     struct AZMEDIA_EXPORT PenOpPaintParam {

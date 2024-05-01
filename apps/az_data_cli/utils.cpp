@@ -2,6 +2,7 @@
 #include "az/core/utils.h"
 #include "az/core/encoding.h"
 #include "az/pen/pen_context.h"
+#include "az/pen/pen_op.h"
 #include "az/js/qjs_wrapper.h"
 
 #include <opencv2/highgui.hpp>

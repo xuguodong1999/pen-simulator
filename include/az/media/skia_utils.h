@@ -1,10 +1,12 @@
 #include "az/core/utils.h"
+#include "az/core/geometry_def.h"
 #include "az/media/config.h"
 #include "az/media/data_output.h"
 
 #include <SkPoint3.h>
 #include <SkCanvas.h>
 #include <SkBitmap.h>
+#include <SkFontMgr.h>
 
 namespace az::pen {
     class PenOp;
@@ -16,6 +18,8 @@ namespace az::media::skia {
     SkMatrix AZMEDIA_EXPORT convert_eigen_33_to_sk_matrix(const TransformMatrix2 &mat);
 
     SkPaint AZMEDIA_EXPORT create_paint(const SkColor &color, const float &stroke_width = 12);
+
+    sk_sp<SkFontMgr> AZMEDIA_EXPORT get_skia_font_manager();
 
     SkFont AZMEDIA_EXPORT create_font(const UCharType &label = "😅");
 

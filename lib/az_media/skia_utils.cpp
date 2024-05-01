@@ -2,20 +2,35 @@
 #include "az/core/utils.h"
 #include "az/core/encoding.h"
 #include "az/pen/pen_context.h"
+#include "az/pen/pen_op.h"
 #include "az/js/qjs_wrapper.h"
 
 #include <SkPoint3.h>
 #include <SkPath.h>
 #include <SkCanvas.h>
-#include <SkFont.h>
+
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+
+#include <SkFontMgr_fontconfig.h>
+
+#elif defined(SK_FONTMGR_CORETEXT_AVAILABLE)
+
+#include <SkFontMgr_mac_ct.h>
+
+#elif defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+
+#include <SkTypeface_win.h>
+
+#endif
+
 #include <SkTextBlob.h>
+#include <SkFont.h>
 #include <SkFontMgr.h>
 #include <SkBitmap.h>
 #include <SkStream.h>
 #include <SkImage.h>
 #include <SkPixelRef.h>
 #include <SkPngEncoder.h>
-
 
 #include <spdlog/spdlog.h>
 
@@ -56,13 +71,30 @@ SkPaint az::media::skia::create_paint(const SkColor &color, const float &stroke_
     return paint;
 }
 
+sk_sp<SkFontMgr> az::media::skia::get_skia_font_manager() {
+    static sk_sp<SkFontMgr> font_mgr;
+    static std::once_flag font_flag;
+    std::call_once(font_flag, []() {
+#if defined(SK_FONTMGR_FONTCONFIG_AVAILABLE)
+        font_mgr = SkFontMgr_New_FontConfig(nullptr);
+#elif defined(SK_FONTMGR_CORETEXT_AVAILABLE)
+        font_mgr = SkFontMgr_New_CoreText(nullptr);
+#elif defined(SK_FONTMGR_DIRECTWRITE_AVAILABLE)
+        font_mgr = SkFontMgr_New_DirectWrite();
+#else
+        font_mgr = SkFontMgr::RefEmpty();
+#endif
+    });
+    return font_mgr;
+}
+
 SkFont az::media::skia::create_font(const UCharType &label) {
     SkFont font;
     auto label_buf = az::js::QjsWrapper::convert_unicode_str_to_buffer(label);
-    auto tf = SkFontMgr::RefEmpty()->matchFamilyStyleCharacter(
+    auto tf = get_skia_font_manager()->matchFamilyStyleCharacter(
             "Noto Color Emoji", SkFontStyle{}, nullptr, 0, SkUnichar{label_buf});
     if (!tf) {
-        tf = SkFontMgr::RefEmpty()->matchFamilyStyleCharacter(
+        tf = get_skia_font_manager()->matchFamilyStyleCharacter(
                 nullptr, SkFontStyle{}, nullptr, 0, SkUnichar{label_buf});
     }
     if (tf) {
