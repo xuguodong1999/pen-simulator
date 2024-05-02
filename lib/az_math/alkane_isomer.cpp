@@ -35,7 +35,7 @@ using namespace az::math;
  * but we need about 10660307791*64/(8*(2^10)^3) = 79.4G memory for C-31
  * so we hard-code two hashmap for C-31 generation on 128G-PC
  */
-#define XGD_C31_128G_SPEC
+//#define XGD_C31_128G_SPEC
 
 #ifdef XGD_DO_COMPRESSION
 static const char *DAT_SUFFIX = ".dat.zst";
