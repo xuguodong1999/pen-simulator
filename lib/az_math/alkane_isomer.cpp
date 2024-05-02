@@ -14,7 +14,6 @@
 #include <boost/iostreams/filter/zstd.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/unordered/concurrent_flat_set.hpp>
-#include <boost/unordered/unordered_flat_set.hpp>
 
 #include <unordered_set>
 #include <iomanip>
@@ -33,7 +32,7 @@ using namespace az::math;
  * boost unordered flat map has a 2^n (1+15) group layout
  * there is a gap from (2^29)*16*64/(8*(2^10)^3) = 64G to the next 128G
  * but we need about 10660307791*64/(8*(2^10)^3) = 79.4G memory for C-31
- * so we hard-code two hashmap for C-31 generation on 128G-PC
+ * so we hard-code 3 hashmap for C-31 generation on 128G-PC
  */
 //#define XGD_C31_128G_SPEC
 
@@ -83,7 +82,7 @@ namespace az::math::impl {
 
     template<typename T>
     class InsertOnlySet {
-        boost::unordered_flat_set<T> p, p1, p2;
+        boost::concurrent_flat_set<T> p, p1, p2;
         const T smi_chunk_back = 0b11111111111111110000000000000001111111111111110000000000000000;
         // c27 r=0.079349,r1=0.043615
         // c29 r=0.078859,r1=0.043512
@@ -113,9 +112,15 @@ namespace az::math::impl {
         }
 
         void visit_all(const std::function<void(const T &)> &on_element) const {
-            for (auto &x: p) { on_element(x); }
-            for (auto &x: p1) { on_element(x); }
-            for (auto &x: p2) { on_element(x); }
+            p.visit_all([&](auto &&x) {
+                on_element(x);
+            });
+            p1.visit_all([&](auto &&x) {
+                on_element(x);
+            });
+            p2.visit_all([&](auto &&x) {
+                on_element(x);
+            });
         }
 
         size_t size() const {
