@@ -186,7 +186,7 @@ TEST(test_math, alkane_sort) {
         smi_chunk.reserve(chunk_size);
         smi_chunk.resize(chunk_size);
         in.read(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
-        boost::sort::parallel_stable_sort(smi_chunk.begin(), smi_chunk.end());
+        boost::sort::block_indirect_sort(smi_chunk.begin(), smi_chunk.end());
 
         std::ofstream out(
                 directory + fmt::format("{}{}", n, ".sort.dat"), std::ios::out | std::ios::binary);
