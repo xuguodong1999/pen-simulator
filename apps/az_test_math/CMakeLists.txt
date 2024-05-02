@@ -12,4 +12,5 @@ xgd_link_libraries(
         PRIVATE
         AzMath
         spdlog
+        boost_sort
 )

@@ -35,7 +35,7 @@ using namespace az::math;
  * but we need about 10660307791*64/(8*(2^10)^3) = 79.4G memory for C-31
  * so we hard-code two hashmap for C-31 generation on 128G-PC
  */
-//#define XGD_C31_128G_SPEC
+#define XGD_C31_128G_SPEC
 
 #ifdef XGD_DO_COMPRESSION
 static const char *DAT_SUFFIX = ".dat.zst";
@@ -48,7 +48,7 @@ namespace az::math::impl {
 
     template<typename T>
     class InsertOnlySet {
-        boost::concurrent_flat_set<T> p, p1;
+        boost::concurrent_flat_set<T> p;
     public:
         void insert(const T &t) {
             p.insert(t);
@@ -84,15 +84,17 @@ namespace az::math::impl {
     template<typename T>
     class InsertOnlySet {
         boost::unordered_flat_set<T> p, p1, p2;
-        std::mutex insertion_mutex;
-        size_t bound, bound1;
+        const T smi_chunk_back = 0b11111111111111110000000000000001111111111111110000000000000000;
+        // c27 r=0.079349,r1=0.043615
+        // c29 r=0.078859,r1=0.043512
+        const T bound = std::round((1. - 0.078) * smi_chunk_back);
+        const T bound1 = std::round((1. - 0.043) * smi_chunk_back);
     public:
         void insert(const T &t) {
-            std::unique_lock lk(insertion_mutex);
-            if (p.size() < bound) {
+            if (t < bound) {
                 p.insert(t);
             } else {
-                if (p1.size() < bound1) {
+                if (t < bound1) {
                     p1.insert(t);
                 } else {
                     p2.insert(t);
@@ -125,8 +127,6 @@ namespace az::math::impl {
             p.reserve((size_t{1} << 33) - (size_t{1} << 31));
             p1.reserve((size_t{1} << 32) - (size_t{1} << 30));
             p2.reserve((size_t{1} << 30) - (size_t{1} << 28));
-            bound = p.max_load() - (size_t{1} << 15);
-            bound1 = p1.max_load() - (size_t{1} << 15);
         }
 
         void max_load_factor(float z) {
@@ -425,49 +425,6 @@ std::vector<SmiHashType> AlkaneIsomerUtil::get_isomers_sync(int8_t count) {
     return last_smi_list;
 }
 
-void AlkaneIsomerUtil::compress_isomers(std::string_view path) {
-    if (!std::filesystem::exists(path)) {
-        throw std::runtime_error(fmt::format("{} is not an existing directory", path));
-    }
-    int8_t end = 0;
-    std::string directory{path};
-    if (!directory.ends_with(fs::path::preferred_separator)) {
-        directory += fs::path::preferred_separator;
-    }
-    SPDLOG_INFO("directory={}", directory);
-    while (fs::exists(directory + fmt::format("{}{}", end + 1, ".dat"))) {
-        end++;
-    }
-    tf::Taskflow taskflow;
-    const size_t thread_num = std::clamp(std::thread::hardware_concurrency(), 1u, 192u);
-    end += 1; // end-1 should exist
-    taskflow.for_each_index(int8_t{1}, end, int8_t{1}, [&](int8_t i) {
-        namespace bi = boost::iostreams;
-        bi::filtering_istream in;
-        bi::filtering_ostream out;
-        out.push(bi::zstd_compressor(bi::zstd_params(bi::zstd::best_compression)));
-        const int8_t n = i;
-        in.push(bi::file_source(
-                directory + fmt::format("{}{}", n, ".dat")), std::ios_base::in | std::ios_base::binary);
-        size_t chunk_size = 0;
-        in.read(reinterpret_cast<char *>(&chunk_size), sizeof(size_t));
-        std::vector<SmiHashType> smi_chunk;
-        smi_chunk.reserve(chunk_size);
-        smi_chunk.resize(chunk_size);
-        in.read(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
-        in.pop();
-        std::sort(smi_chunk.begin(), smi_chunk.end());
-
-        std::ofstream out_stream(
-                directory + fmt::format("{}{}", n, ".dat.zst"), std::ios_base::out | std::ios_base::binary);
-        out.push(out_stream);
-        out.write(reinterpret_cast<char *>(&chunk_size), sizeof(size_t));
-        out.write(reinterpret_cast<char *>(smi_chunk.data()), sizeof(SmiHashType) * chunk_size);
-        out.pop();
-    });
-    tf::Executor(thread_num).run(taskflow).get();
-}
-
 void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, size_t thread_num) {
     if (!std::filesystem::exists(path)) {
         throw std::runtime_error(fmt::format("{} is not an existing directory", path));
@@ -495,7 +452,7 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
         FastGraph g;
         smi_chunk = {g.hash()};
         std::ofstream out_stream(
-                directory + fmt::format("{}{}", 1, DAT_SUFFIX), std::ios_base::out | std::ios_base::binary);
+                directory + fmt::format("{}{}", 1, DAT_SUFFIX), std::ios::out | std::ios::binary);
         out.push(out_stream);
         size_t isomer_count = smi_chunk.size();
         out.write(reinterpret_cast<char *>(&isomer_count), sizeof(size_t));
@@ -516,9 +473,10 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
     };
     // now start+1 point to a missing dat file
     for (int8_t n = start + 1; n <= count; n++) {
-        in.push(bi::file_source(
-                directory + fmt::format("{}{}", n - 1, DAT_SUFFIX)), std::ios_base::in | std::ios_base::binary);
         size_t last_count = 0;
+        std::ifstream in_stream;
+        in_stream.open(directory + fmt::format("{}{}", n - 1, DAT_SUFFIX), std::ios::in | std::ios::binary);
+        in.push(in_stream);
         in.read(reinterpret_cast<char *>(&last_count), sizeof(size_t));
 
         HashSet global_set;
@@ -560,7 +518,7 @@ void AlkaneIsomerUtil::dump_isomers_sync(int8_t count, std::string_view path, si
         in.pop();
 
         std::ofstream out_stream(
-                directory + fmt::format("{}{}", n, DAT_SUFFIX), std::ios_base::out | std::ios_base::binary);
+                directory + fmt::format("{}{}", n, DAT_SUFFIX), std::ios::out | std::ios::binary);
         out.push(out_stream);
         size_t isomer_count = global_set.size();
         SPDLOG_INFO("alkanes {} count {}", n, isomer_count);
