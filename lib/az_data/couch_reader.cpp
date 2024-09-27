@@ -55,6 +55,7 @@ static void read_idx_batched(
         {
             std::unique_lock lk(mutex);
             for (auto &sample: samples) {
+//                const std::optional<UCharType> maybe_label = std::nullopt;
                 const auto maybe_label = az::data::map_unicode_by_label(sample->label);
 //                const auto maybe_label = az::data::map_unicode_by_shape(sample->label);
                 const auto &label = maybe_label ? maybe_label.value() : sample->label;

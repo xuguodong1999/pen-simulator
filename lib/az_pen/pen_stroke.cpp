@@ -37,7 +37,7 @@ Box2 PenStroke::bbox(const TransformMatrix2 &parent_trans) {
 }
 
 void PenStroke::set_data(SizeType size, const std::function<void(ScalarType &x, ScalarType &y)> &on_next) {
-    this->points.resize(this->count(), static_cast<Eigen::Index>(size));
+    this->points.resize(this->points.rows(), static_cast<Eigen::Index>(size));
     for (auto p: this->points.colwise()) {
         on_next(p.x(), p.y());
     }
@@ -74,5 +74,5 @@ Vec2Array PenStroke::as_points() {
 }
 
 size_t PenStroke::count() const {
-    return this->points.rows();
+    return this->points.cols();
 }

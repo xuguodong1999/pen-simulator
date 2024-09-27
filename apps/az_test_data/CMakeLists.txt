@@ -15,6 +15,7 @@ xgd_link_libraries(
         AzJs
         skia
         opencv_imgproc
+        boost_locale
         boost_property_tree
         spdlog
 )
