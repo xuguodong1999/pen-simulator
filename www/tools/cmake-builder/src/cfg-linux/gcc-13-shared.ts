@@ -48,6 +48,7 @@ const config: ICMakeBuildConfig = {
             'CMAKE_BUILD_TYPE:STRING=Release',
             'XGD_USE_CUDA:BOOL=OFF',
             'BUILD_SHARED_LIBS:BOOL=ON',
+            'Python_EXECUTABLE=/home/xgd/miniconda3/envs/nn/bin/python'
         ]
     },
     build: {
