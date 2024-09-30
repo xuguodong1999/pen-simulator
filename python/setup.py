@@ -33,7 +33,7 @@ class CMakeBuild(build_ext):
             f'-DXGD_USE_VK=OFF',
             f'-DXGD_USE_TORCH=OFF',
             f'-DXGD_USE_FONTCONFIG=OFF',
-            # f'-DXGD_FLAG_IPO=OFF',
+            f'-DXGD_FLAG_IPO=OFF',
         ]
         if sys.platform.find('win32') != -1:
             cmake_args.append(f'-DCMAKE_MSVC_RUNTIME_LIBRARY:STRING=MultiThreaded')
