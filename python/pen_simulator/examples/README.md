@@ -45,6 +45,6 @@ python visualize_mpl.py --couch path/to/SCUT_IRAC/Couch --makemeahanzi path/to/m
 ```txt
 # Linux: --couch /mnt/data/datasets/SCUT_IRAC/Couch --makemeahanzi /home/xgd/git/_/web/makemeahanzi/graphics.txt
 # WSL2: --couch /home/xgd/datasets/SCUT_IRAC/Couch --makemeahanzi /home/xgd/git/_/web/makemeahanzi/graphics.txt
-# Windows: --couch D:/datasets/ntfs/SCUT_IRAC/Couch --makemeahanzi D:/git/_/web/makemeahanzi/graphics.txt
+# Windows: --couch E:/datasets/ntfs/SCUT_IRAC/Couch --makemeahanzi D:/git/_/web/makemeahanzi/graphics.txt
 # Mac: --couch /Users/xgd/datasets/SCUT_IRAC/Couch --makemeahanzi /Users/xgd/git/_/web/makemeahanzi/graphics.txt
 ```

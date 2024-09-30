@@ -59,7 +59,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pen_simulator',
-    version='0.0.1',
+    version='0.0.2',
     description='pen simulator: data synthesis for simulation of pen-based interaction',
     author='xuguodong1999',
     url='https://github.com/xuguodong1999/pen-simulator',
@@ -73,7 +73,6 @@ setup(
     ]},
     install_requires=[
         'numpy',
-        'pybind11',
     ],
     ext_modules=[CMakeExtension('pen_simulator', '..')],
     cmdclass={'build_ext': CMakeBuild},
