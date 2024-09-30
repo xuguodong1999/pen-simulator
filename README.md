@@ -40,8 +40,6 @@ https://github.com/xuguodong1999/pen-simulator/assets/40680607/3de121c6-1804-47d
 https://github.com/xuguodong1999/pen-simulator/assets/40680607/d4fb422e-6b16-4453-867a-a28e8c117194
 
 
-* Draft playground of alkane isomer generation
-
 ## API Usage
 
 PEN-SIMULATOR is written in C++ and has Python bindings.
