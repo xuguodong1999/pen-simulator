@@ -18,6 +18,12 @@ configure_file(
 )
 
 configure_file(
+        ${SRC_DIR}/arrow/util/config_internal.h.cmake
+        ${GEN_DIR}/arrow/util/config_internal.h
+        @ONLY
+)
+
+configure_file(
         ${SRC_DIR}/parquet/parquet_version.h.in
         ${GEN_DIR}/parquet/parquet_version.h
         @ONLY

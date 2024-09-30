@@ -64,3 +64,5 @@ target_link_libraries(
         $<$<BOOL:${ANDROID}>:log>
         $<$<PLATFORM_ID:Darwin>:${COREFOUNDATION_LIBRARY}>
 )
+
+xgd_link_libraries(absl PRIVATE gtest)

@@ -99,6 +99,7 @@ xgd_link_libraries(
         boost_tokenizer
         boost_algorithm
         boost_scope_exit
+        boost_uuid
         PUBLIC
         boost_numeric_conversion
 )

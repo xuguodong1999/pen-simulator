@@ -10,23 +10,17 @@ set(SRC_DIR ${ROOT_DIR}/src)
 # All platform-independent sources and private headers.
 set(ENCODE_SRCS
         src/encode/SkEncoder.cpp
-        src/encode/SkICCPriv.h
-        src/encode/SkICC.cpp
-        src/encode/SkImageEncoderFns.h
-        src/encode/SkImageEncoderPriv.h)
+        src/encode/SkICC.cpp)
 
 set(ENCODE_JPEG_SRCS
-        src/encode/SkJpegEncoderImpl.h
         src/encode/SkJpegEncoderImpl.cpp
-        src/encode/SkJPEGWriteUtility.cpp
-        src/encode/SkJPEGWriteUtility.h)
+        src/encode/SkJPEGWriteUtility.cpp)
 
 set(NO_ENCODE_JPEG_SRCS
         src/encode/SkJpegEncoder_none.cpp)
 
 set(ENCODE_PNG_SRCS
-        src/encode/SkPngEncoderImpl.cpp
-        src/encode/SkPngEncoderImpl.h)
+        src/encode/SkPngEncoderImpl.cpp)
 
 set(NO_ENCODE_PNG_SRCS
         src/encode/SkPngEncoder_none.cpp)
@@ -40,60 +34,34 @@ set(NO_ENCODE_WEBP_SRCS
 set(CODEC_SRCS_LIMITED
         src/codec/SkAndroidCodec.cpp
         src/codec/SkAndroidCodecAdapter.cpp
-        src/codec/SkAndroidCodecAdapter.h
         src/codec/SkBmpBaseCodec.cpp
-        src/codec/SkBmpBaseCodec.h
         src/codec/SkBmpCodec.cpp
-        src/codec/SkBmpCodec.h
         src/codec/SkBmpMaskCodec.cpp
-        src/codec/SkBmpMaskCodec.h
         src/codec/SkBmpRLECodec.cpp
-        src/codec/SkBmpRLECodec.h
         src/codec/SkBmpStandardCodec.cpp
-        src/codec/SkBmpStandardCodec.h
         src/codec/SkCodec.cpp
         src/codec/SkCodecImageGenerator.cpp
-        src/codec/SkCodecImageGenerator.h
-        src/codec/SkCodecPriv.h
         src/codec/SkColorPalette.cpp
-        src/codec/SkColorPalette.h
         src/codec/SkExif.cpp
         src/codec/SkEncodedInfo.cpp
-        src/codec/SkFrameHolder.h
         src/codec/SkImageGenerator_FromEncoded.cpp
         src/codec/SkJpegCodec.cpp
-        src/codec/SkJpegCodec.h
         src/codec/SkJpegDecoderMgr.cpp
-        src/codec/SkJpegDecoderMgr.h
-        src/codec/SkJpegPriv.h
         src/codec/SkJpegSourceMgr.cpp
-        src/codec/SkJpegSourceMgr.h
         src/codec/SkJpegUtility.cpp
-        src/codec/SkJpegUtility.h
         src/codec/SkMaskSwizzler.cpp
-        src/codec/SkMaskSwizzler.h
         src/codec/SkParseEncodedOrigin.cpp
-        src/codec/SkParseEncodedOrigin.h
-        src/codec/SkPngPriv.h
         src/codec/SkSampledCodec.cpp
-        src/codec/SkSampledCodec.h
-        src/codec/SkScalingCodec.h
         src/codec/SkSampler.cpp
-        src/codec/SkSampler.h
         src/codec/SkSwizzler.cpp
-        src/codec/SkSwizzler.h
         src/codec/SkTiffUtility.cpp
         src/codec/SkWbmpCodec.cpp
-        src/codec/SkWbmpCodec.h
         src/codec/SkWuffsCodec.cpp)
 
 set(CODEC_SRCS_ALL ${CODEC_SRCS_LIMITED}
         src/codec/SkIcoCodec.cpp
-        src/codec/SkIcoCodec.h
         src/codec/SkPngCodec.cpp
-        src/codec/SkPngCodec.h
-        src/codec/SkWebpCodec.cpp
-        src/codec/SkWebpCodec.h)
+        src/codec/SkWebpCodec.cpp)
 
 set(TEXTUAL_HDRS
         src/sksl/generated/sksl_compute.minified.sksl
@@ -125,53 +93,30 @@ set(base_gl_srcs
         src/gpu/ganesh/gl/GrGLAssembleInterface.cpp
         src/gpu/ganesh/gl/GrGLAssembleWebGLInterfaceAutogen.cpp
         src/gpu/ganesh/gl/GrGLAttachment.cpp
-        src/gpu/ganesh/gl/GrGLAttachment.h
         src/gpu/ganesh/gl/GrGLBackendSurface.cpp
-        src/gpu/ganesh/gl/GrGLBackendSurfacePriv.h
         src/gpu/ganesh/gl/GrGLBuffer.cpp
-        src/gpu/ganesh/gl/GrGLBuffer.h
         src/gpu/ganesh/gl/GrGLCaps.cpp
-        src/gpu/ganesh/gl/GrGLCaps.h
         src/gpu/ganesh/gl/GrGLContext.cpp
-        src/gpu/ganesh/gl/GrGLContext.h
-        src/gpu/ganesh/gl/GrGLDefines.h
         src/gpu/ganesh/gl/GrGLDirectContext.cpp
         src/gpu/ganesh/gl/GrGLExtensions.cpp
         src/gpu/ganesh/gl/GrGLFinishCallbacks.cpp
-        src/gpu/ganesh/gl/GrGLFinishCallbacks.h
         src/gpu/ganesh/gl/GrGLGLSL.cpp
-        src/gpu/ganesh/gl/GrGLGLSL.h
         src/gpu/ganesh/gl/GrGLGpu.cpp
-        src/gpu/ganesh/gl/GrGLGpu.h
         src/gpu/ganesh/gl/GrGLGpuProgramCache.cpp
         src/gpu/ganesh/gl/GrGLInterfaceAutogen.cpp
         src/gpu/ganesh/gl/GrGLOpsRenderPass.cpp
-        src/gpu/ganesh/gl/GrGLOpsRenderPass.h
         src/gpu/ganesh/gl/GrGLProgram.cpp
-        src/gpu/ganesh/gl/GrGLProgram.h
         src/gpu/ganesh/gl/GrGLProgramDataManager.cpp
-        src/gpu/ganesh/gl/GrGLProgramDataManager.h
         src/gpu/ganesh/gl/GrGLRenderTarget.cpp
-        src/gpu/ganesh/gl/GrGLRenderTarget.h
         src/gpu/ganesh/gl/GrGLSemaphore.cpp
-        src/gpu/ganesh/gl/GrGLSemaphore.h
         src/gpu/ganesh/gl/GrGLTexture.cpp
-        src/gpu/ganesh/gl/GrGLTexture.h
         src/gpu/ganesh/gl/GrGLTextureRenderTarget.cpp
-        src/gpu/ganesh/gl/GrGLTextureRenderTarget.h
         src/gpu/ganesh/gl/GrGLTypesPriv.cpp
-        src/gpu/ganesh/gl/GrGLTypesPriv.h
         src/gpu/ganesh/gl/GrGLUniformHandler.cpp
-        src/gpu/ganesh/gl/GrGLUniformHandler.h
         src/gpu/ganesh/gl/GrGLUtil.cpp
-        src/gpu/ganesh/gl/GrGLUtil.h
-        src/gpu/ganesh/gl/GrGLVaryingHandler.h
         src/gpu/ganesh/gl/GrGLVertexArray.cpp
-        src/gpu/ganesh/gl/GrGLVertexArray.h
         src/gpu/ganesh/gl/builders/GrGLProgramBuilder.cpp
-        src/gpu/ganesh/gl/builders/GrGLProgramBuilder.h
-        src/gpu/ganesh/gl/builders/GrGLShaderStringBuilder.cpp
-        src/gpu/ganesh/gl/builders/GrGLShaderStringBuilder.h)
+        src/gpu/ganesh/gl/builders/GrGLShaderStringBuilder.cpp)
 
 set(GL_SRCS_UNIX ${base_gl_srcs}
         src/gpu/ganesh/gl/GrGLMakeNativeInterface_none.cpp)
@@ -181,7 +126,6 @@ set(GL_SRCS_UNIX_EGL ${base_gl_srcs}
         src/gpu/ganesh/gl/egl/GrGLMakeNativeInterface_egl.cpp)
 
 set(PORTS_SRCS_WIN
-        src/fonts/SkFontMgr_indirect.cpp
         src/ports/SkFontMgr_win_dw.cpp
         src/ports/SkScalerContext_win_dw.cpp
         src/ports/SkTypeface_win_dw.cpp
@@ -193,19 +137,15 @@ set(PORTS_SRCS_WIN
 set(PORTS_SRCS_UNIX
         src/ports/SkDebug_stdio.cpp
         src/ports/SkFontHost_FreeType_common.cpp
-        src/ports/SkFontHost_FreeType_common.h
         src/ports/SkFontHost_FreeType.cpp
         src/ports/SkFontMgr_custom.cpp
         src/ports/SkFontMgr_custom_directory.cpp
         src/ports/SkFontMgr_custom_embedded.cpp
         src/ports/SkFontMgr_custom_empty.cpp
-        src/ports/SkFontMgr_custom.h
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
         src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        #        src/ports/SkOSLibrary_posix.cpp
 )
 if (XGD_USE_FONTCONFIG)
     list(APPEND PORTS_SRCS_UNIX
@@ -218,23 +158,18 @@ set(GL_SRCS_ANDROID ${base_gl_srcs}
 set(PORTS_SRCS_ANDROID
         src/ports/SkDebug_android.cpp
         src/ports/SkFontHost_FreeType_common.cpp
-        src/ports/SkFontHost_FreeType_common.h
         src/ports/SkFontHost_FreeType.cpp
         src/ports/SkFontMgr_android.cpp
         src/ports/SkFontMgr_android_factory.cpp
         src/ports/SkFontMgr_android_parser.cpp
-        src/ports/SkFontMgr_android_parser.h
         src/ports/SkFontMgr_custom.cpp
         src/ports/SkFontMgr_custom_directory.cpp
         src/ports/SkFontMgr_custom_embedded.cpp
         src/ports/SkFontMgr_custom_empty.cpp
-        src/ports/SkFontMgr_custom.h
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
-        src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        src/ports/SkOSLibrary_posix.cpp)
+        src/ports/SkOSFile_stdio.cpp)
 
 set(PORTS_SRCS_ANDROID_NO_FONT
         src/gpu/android/AHardwareBufferUtils.cpp
@@ -243,50 +178,35 @@ set(PORTS_SRCS_ANDROID_NO_FONT
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
-        src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        src/ports/SkOSLibrary_posix.cpp)
+        src/ports/SkOSFile_stdio.cpp)
 
 set(GL_SRCS_IOS ${base_gl_srcs}
         src/gpu/ganesh/gl/iOS/GrGLMakeNativeInterface_iOS.cpp)
 
 set(PORTS_SRCS_IOS
         src/ports/SkDebug_stdio.cpp
-        src/ports/SkFontMgr_custom.h
         src/ports/SkFontMgr_mac_ct.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkImageGeneratorCG.cpp
         src/ports/SkMemory_malloc.cpp
-        src/ports/SkOSFile_ios.h
         src/ports/SkOSFile_posix.cpp
         src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        src/ports/SkOSLibrary_posix.cpp
         src/ports/SkScalerContext_mac_ct.cpp
-        src/ports/SkScalerContext_mac_ct.h
         src/ports/SkTypeface_mac_ct.cpp
-        src/ports/SkTypeface_mac_ct.h
-        src/utils/mac/SkCGBase.h
-        src/utils/mac/SkCGGeometry.h
         src/utils/mac/SkCreateCGImageRef.cpp
-        src/utils/mac/SkCTFont.cpp
-        src/utils/mac/SkCTFont.h
-        src/utils/mac/SkUniqueCFRef.h)
+        src/utils/mac/SkCTFontCreateExactCopy.cpp
+        src/utils/mac/SkCTFont.cpp)
 
 set(PORTS_SRCS_FUCHSIA
         src/ports/SkDebug_stdio.cpp
         src/ports/SkFontHost_FreeType_common.cpp
-        src/ports/SkFontHost_FreeType_common.h
         src/ports/SkFontHost_FreeType.cpp
         src/ports/SkFontMgr_custom.cpp
-        src/ports/SkFontMgr_custom.h
         src/ports/SkFontMgr_fuchsia.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
-        src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        src/ports/SkOSLibrary_posix.cpp)
+        src/ports/SkOSFile_stdio.cpp)
 
 set(GL_SRCS_MACOS ${base_gl_srcs}
         src/gpu/ganesh/gl/mac/GrGLMakeNativeInterface_mac.cpp)
@@ -296,45 +216,14 @@ set(PORTS_SRCS_MACOS ${PORTS_SRCS_IOS})
 set(PORTS_SRCS_WASM
         src/ports/SkDebug_stdio.cpp
         src/ports/SkFontHost_FreeType_common.cpp
-        src/ports/SkFontHost_FreeType_common.h
         src/ports/SkFontHost_FreeType.cpp
         src/ports/SkFontMgr_custom.cpp
-        src/ports/SkFontMgr_custom.h
         src/ports/SkFontMgr_custom_embedded.cpp
         src/ports/SkGlobalInitialization_default.cpp
         src/ports/SkMemory_malloc.cpp
         src/ports/SkOSFile_posix.cpp
-        src/ports/SkOSFile_stdio.cpp
-        src/ports/SkOSLibrary.h
-        src/ports/SkOSLibrary_posix.cpp)
+        src/ports/SkOSFile_stdio.cpp)
 set(GL_SRCS_WASM ${GL_SRCS_UNIX_EGL})
-
-set(MTL_HDRS
-        src/gpu/ganesh/mtl/GrMtlAttachment.h
-        src/gpu/ganesh/mtl/GrMtlBuffer.h
-        src/gpu/ganesh/mtl/GrMtlCaps.h
-        src/gpu/ganesh/mtl/GrMtlCommandBuffer.h
-        src/gpu/ganesh/mtl/GrMtlCppUtil.h
-        src/gpu/ganesh/mtl/GrMtlDepthStencil.h
-        src/gpu/ganesh/mtl/GrMtlFramebuffer.h
-        src/gpu/ganesh/mtl/GrMtlGpu.h
-        src/gpu/ganesh/mtl/GrMtlOpsRenderPass.h
-        src/gpu/ganesh/mtl/GrMtlPipeline.h
-        src/gpu/ganesh/mtl/GrMtlPipelineState.h
-        src/gpu/ganesh/mtl/GrMtlPipelineStateBuilder.h
-        src/gpu/ganesh/mtl/GrMtlPipelineStateDataManager.h
-        src/gpu/ganesh/mtl/GrMtlRenderCommandEncoder.h
-        src/gpu/ganesh/mtl/GrMtlRenderTarget.h
-        src/gpu/ganesh/mtl/GrMtlResourceProvider.h
-        src/gpu/ganesh/mtl/GrMtlSampler.h
-        src/gpu/ganesh/mtl/GrMtlSemaphore.h
-        src/gpu/ganesh/mtl/GrMtlTexture.h
-        src/gpu/ganesh/mtl/GrMtlTextureRenderTarget.h
-        src/gpu/ganesh/mtl/GrMtlTrampoline.h
-        src/gpu/ganesh/mtl/GrMtlUniformHandler.h
-        src/gpu/ganesh/mtl/GrMtlUtil.h
-        src/gpu/ganesh/mtl/GrMtlVaryingHandler.h
-        src/gpu/mtl/MtlMemoryAllocatorImpl.h)
 
 set(MTL_SRCS
         src/gpu/ganesh/mtl/GrMtlAttachment.mm
@@ -355,138 +244,50 @@ set(MTL_SRCS
         src/gpu/ganesh/mtl/GrMtlTexture.mm
         src/gpu/ganesh/mtl/GrMtlTextureRenderTarget.mm
         src/gpu/ganesh/mtl/GrMtlTrampoline.mm
-        src/gpu/ganesh/mtl/GrMtlTypesPriv.h
         src/gpu/ganesh/mtl/GrMtlTypesPriv.mm
         src/gpu/ganesh/mtl/GrMtlUniformHandler.mm
         src/gpu/ganesh/mtl/GrMtlUtil.mm
         src/gpu/ganesh/mtl/GrMtlVaryingHandler.mm
         src/gpu/ganesh/surface/SkSurface_GaneshMtl.mm
         src/gpu/mtl/MtlMemoryAllocatorImpl.mm
-        src/gpu/mtl/MtlUtils.mm
-        src/gpu/mtl/MtlUtilsPriv.h)
+        src/gpu/mtl/MtlUtils.mm)
 
 set(VULKAN_SRCS
         src/gpu/ganesh/vk/GrVkBackendSurface.cpp
-        src/gpu/ganesh/vk/GrVkBackendSurfacePriv.h
         src/gpu/ganesh/vk/GrVkBuffer.cpp
-        src/gpu/ganesh/vk/GrVkBuffer.h
         src/gpu/ganesh/vk/GrVkCaps.cpp
-        src/gpu/ganesh/vk/GrVkCaps.h
         src/gpu/ganesh/vk/GrVkCommandBuffer.cpp
-        src/gpu/ganesh/vk/GrVkCommandBuffer.h
         src/gpu/ganesh/vk/GrVkCommandPool.cpp
-        src/gpu/ganesh/vk/GrVkCommandPool.h
         src/gpu/ganesh/vk/GrVkDescriptorPool.cpp
-        src/gpu/ganesh/vk/GrVkDescriptorPool.h
         src/gpu/ganesh/vk/GrVkDescriptorSet.cpp
-        src/gpu/ganesh/vk/GrVkDescriptorSet.h
         src/gpu/ganesh/vk/GrVkDescriptorSetManager.cpp
-        src/gpu/ganesh/vk/GrVkDescriptorSetManager.h
         src/gpu/ganesh/vk/GrVkDirectContext.cpp
         src/gpu/ganesh/vk/GrVkFramebuffer.cpp
-        src/gpu/ganesh/vk/GrVkFramebuffer.h
         src/gpu/ganesh/vk/GrVkGpu.cpp
-        src/gpu/ganesh/vk/GrVkGpu.h
         src/gpu/ganesh/vk/GrVkImage.cpp
-        src/gpu/ganesh/vk/GrVkImage.h
-        src/gpu/ganesh/vk/GrVkImageLayout.h
         src/gpu/ganesh/vk/GrVkImageView.cpp
-        src/gpu/ganesh/vk/GrVkImageView.h
-        src/gpu/ganesh/vk/GrVkManagedResource.h
         src/gpu/ganesh/vk/GrVkMSAALoadManager.cpp
-        src/gpu/ganesh/vk/GrVkMSAALoadManager.h
         src/gpu/ganesh/vk/GrVkOpsRenderPass.cpp
-        src/gpu/ganesh/vk/GrVkOpsRenderPass.h
         src/gpu/ganesh/vk/GrVkPipeline.cpp
-        src/gpu/ganesh/vk/GrVkPipeline.h
         src/gpu/ganesh/vk/GrVkPipelineStateBuilder.cpp
-        src/gpu/ganesh/vk/GrVkPipelineStateBuilder.h
         src/gpu/ganesh/vk/GrVkPipelineStateCache.cpp
         src/gpu/ganesh/vk/GrVkPipelineState.cpp
         src/gpu/ganesh/vk/GrVkPipelineStateDataManager.cpp
-        src/gpu/ganesh/vk/GrVkPipelineStateDataManager.h
-        src/gpu/ganesh/vk/GrVkPipelineState.h
         src/gpu/ganesh/vk/GrVkRenderPass.cpp
-        src/gpu/ganesh/vk/GrVkRenderPass.h
         src/gpu/ganesh/vk/GrVkRenderTarget.cpp
-        src/gpu/ganesh/vk/GrVkRenderTarget.h
         src/gpu/ganesh/vk/GrVkResourceProvider.cpp
-        src/gpu/ganesh/vk/GrVkResourceProvider.h
         src/gpu/ganesh/vk/GrVkSampler.cpp
-        src/gpu/ganesh/vk/GrVkSampler.h
         src/gpu/ganesh/vk/GrVkSamplerYcbcrConversion.cpp
-        src/gpu/ganesh/vk/GrVkSamplerYcbcrConversion.h
         src/gpu/ganesh/vk/GrVkSemaphore.cpp
-        src/gpu/ganesh/vk/GrVkSemaphore.h
         src/gpu/ganesh/vk/GrVkTexture.cpp
-        src/gpu/ganesh/vk/GrVkTexture.h
         src/gpu/ganesh/vk/GrVkTextureRenderTarget.cpp
-        src/gpu/ganesh/vk/GrVkTextureRenderTarget.h
         src/gpu/ganesh/vk/GrVkTypesPriv.cpp
-        src/gpu/ganesh/vk/GrVkTypesPriv.h
         src/gpu/ganesh/vk/GrVkUniformHandler.cpp
-        src/gpu/ganesh/vk/GrVkUniformHandler.h
         src/gpu/ganesh/vk/GrVkUtil.cpp
-        src/gpu/ganesh/vk/GrVkUtil.h
         src/gpu/ganesh/vk/GrVkVaryingHandler.cpp
-        src/gpu/ganesh/vk/GrVkVaryingHandler.h
         src/gpu/vk/VulkanExtensions.cpp
         src/gpu/vk/VulkanInterface.cpp
-        src/gpu/vk/VulkanInterface.h
-        src/gpu/vk/VulkanMemory.cpp
-        src/gpu/vk/VulkanMemory.h
-        src/gpu/vk/VulkanUtilsPriv.h)
-
-#################################################################################
-### DEFINES
-#################################################################################
-#UNIX_DEFINES = [
-#PNG_SKIP_SETJMP_CHECK
-#SK_BUILD_FOR_UNIX
-#SK_CODEC_DECODES_PNG
-#SK_CODEC_DECODES_WEBP
-#SK_R32_SHIFT=16
-#SK_GL
-#SK_CODEC_DECODES_JPEG
-#]
-#ANDROID_DEFINES = [
-#SK_BUILD_FOR_ANDROID
-#SK_CODEC_DECODES_PNG
-#SK_CODEC_DECODES_WEBP
-#SK_GL
-#SK_CODEC_DECODES_JPEG
-#]
-#IOS_DEFINES = [
-#SK_BUILD_FOR_IOS
-#SK_CODEC_DECODES_JPEG
-#]
-#WASM_DEFINES = [
-#SK_DISABLE_LEGACY_SHADERCONTEXT
-#SK_DISABLE_TRACING
-#SK_GL
-#SK_FORCE_AAA
-#SK_DISABLE_EFFECT_DESERIALIZATION
-#SK_FORCE_8_BYTE_ALIGNMENT
-#SKNX_NO_SIMD
-#SK_CODEC_DECODES_JPEG
-#]
-#FUCHSIA_DEFINES = [
-#SK_BUILD_FOR_UNIX
-#SK_CODEC_DECODES_PNG
-#SK_CODEC_DECODES_WEBP
-#SK_R32_SHIFT=16
-#SK_VULKAN
-#SK_CODEC_DECODES_JPEG
-#]
-#MACOS_DEFINES = [
-#SK_BUILD_FOR_MAC
-#SK_GL
-#SK_CODEC_DECODES_JPEG
-#]
-#ANDROID_NO_CODECS_DEFINES = [
-#SK_BUILD_FOR_ANDROID
-#SK_GL
-#]
+        src/gpu/vk/VulkanMemory.cpp)
 
 
 #############################
@@ -555,7 +356,7 @@ set(SKIA_SRC_DIRS
         ${SRC_DIR}/text
         ${SRC_DIR}/text/gpu
         ${SRC_DIR}/utils
-        #        ${SRC_DIR}/xps
+#        ${SRC_DIR}/xps
 )
 if (WIN32)
     list(APPEND SKIA_SRC_DIRS ${SRC_DIR}/utils/win)
@@ -593,6 +394,14 @@ xgd_add_library(skia
         ${SRC_DIR}/codec/SkJpegxlCodec.cpp
         ${SRC_DIR}/codec/SkJpegXmp.cpp
         ${SRC_DIR}/utils/win/SkWGL_win.cpp
+        ${SRC_DIR}/utils/SkGetExecutablePath_win.cpp
+        ${SRC_DIR}/utils/SkGetExecutablePath_mac.cpp
+        ${SRC_DIR}/utils/SkGetExecutablePath_linux.cpp
+        ${SRC_DIR}/sksl/codegen/SkSLWGSLValidator.cpp
+        ${SRC_DIR}/sksl/codegen/SkSLHLSLCodeGenerator.cpp
+        ${SRC_DIR}/sksl/codegen/SkSLSPIRVValidator.cpp
+        ${SRC_DIR}/sksl/codegen/SkSLSPIRVtoHLSL.cpp
+        ${SRC_DIR}/sksl/SkSLModuleDataFile.cpp
         SRC_DIRS
         ${SKIA_SRC_DIRS}
         INCLUDE_DIRS
