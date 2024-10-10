@@ -9,7 +9,8 @@ import {
     RegisterHTMLHandler,
     SVG,
     TeX,
-    Wrapper
+    Wrapper,
+    countUnicode,
 } from './src/wrapper';
 
 // https://stackoverflow.com/questions/11616630/how-can-i-print-a-circular-structure-in-a-json-like-format
@@ -118,10 +119,6 @@ const variants: {
     }
     return result;
 })();
-
-function countUnicode(str: string) {
-    return Array.from(str).length;
-}
 
 function unicodeCharToHex(str: string) {
     const unicodeLength = countUnicode(str);

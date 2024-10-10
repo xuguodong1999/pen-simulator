@@ -12,6 +12,10 @@ import {JSONFontData} from "./ts/output/json/FontData";
 import {entities} from "mathjax-full/js/util/Entities";
 import {delimiters} from "mathjax-full/js/output/common/fonts/tex/delimiters";
 
+function countUnicode(str: string) {
+    return Array.from(str).length;
+}
+
 class Wrapper {
     static adaptor: LiteAdaptor;
     static jsonDocument: MathDocument<any, any, any>;
@@ -73,6 +77,14 @@ class Wrapper {
                     while (root && !value) {
                         value = (root as LiteElement).attributes?.['data-mml-text'];
                         root = root.parent;
+                    }
+                    if (countUnicode(value) != 1) {
+                        if (x.children.length == 1) {
+                            const unicodeText = x.children[0]
+                            if (unicodeText instanceof LiteText) {
+                                value = unicodeText.value
+                            }
+                        }
                     }
                 }
                 const maybeDataClass = x.attributes['data-c'];
@@ -186,4 +198,5 @@ export {
     RegisterHTMLHandler,
     SVG,
     TeX,
+    countUnicode,
 };
