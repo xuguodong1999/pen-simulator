@@ -49,7 +49,9 @@ void PenStroke::on_paint(const TransformMatrix2 &parent_trans) {
     }
     Transform2 current_trans;
     current_trans.matrix() = parent_trans * this->trans;
-    if (this->points.cols() == 1) {
+    if (this->points.cols() == 0) {
+        return;
+    } else if (this->points.cols() == 1) {
         Vec2 p = current_trans * this->points.col(0);
         context->draw_line(p.x(), p.y(), p.x(), p.y());
         return;
