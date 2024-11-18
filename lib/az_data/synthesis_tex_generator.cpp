@@ -180,7 +180,20 @@ std::shared_ptr<az::pen::PenGraph> SynthesisTexGenerator::generate_next(
         } else if ("text" == node.svg_type) { // handle plain text
             if (1 == az::js::QjsWrapper::count_unicode(node.text)) {
                 ScalarType width = node.font_size;
-                Box2 box(Vec2{0, -width}, Vec2{width, 0});
+                Box2 box{Vec2{0, -width}, Vec2{width, 0}};
+                static const std::unordered_set<LabelType> special_layout_set{"，", "。", "、", "“", "”", "‘", "’",};
+                if (special_layout_set.contains(node.text)) {
+                    static const std::unordered_set<LabelType> bottom_layout_set{"，", "。", "、",};
+                    if (bottom_layout_set.contains(node.text)) {
+                        box = Box2{Vec2{0, -width / 4}, Vec2{width, 0}};
+                    } else {
+                        // FIXME: chinese quotes are split into svgs by mathjax
+                        static const std::unordered_set<LabelType> top_layout_set{"“", "”", "‘", "’",};
+                        if (top_layout_set.contains(node.text)) {
+                            box = Box2{Vec2{0, -width}, Vec2{width, -width / 4 * 3}};
+                        }
+                    }
+                }
                 // ignore below. we use origin box to create font, apply transformation on it further.
 //            Transform2 trans;
 //            trans.matrix() = current_transform;
