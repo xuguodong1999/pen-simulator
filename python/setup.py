@@ -59,7 +59,7 @@ class CMakeBuild(build_ext):
 
 setup(
     name='pen_simulator',
-    version='0.0.3',
+    version='0.0.4',
     description='pen simulator: data synthesis for simulation of pen-based interaction',
     author='xuguodong1999',
     url='https://github.com/xuguodong1999/pen-simulator',
