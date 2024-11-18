@@ -25,6 +25,8 @@ namespace az::pen {
 
         void on_paint(const TransformMatrix2 &parent_trans) final;
 
+        ScalarType get_average_item_size();
+
         Vec2 adjust_size_for_rendering(
                 const ScalarType &ideal_item_size,
                 const ScalarType &max_render_size,

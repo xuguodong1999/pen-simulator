@@ -89,6 +89,20 @@ void PenGraph::on_paint(const TransformMatrix2 &parent_trans) {
     }
 }
 
+ScalarType PenGraph::get_average_item_size() {
+    if (this->data.empty()) {
+        return 0;
+    }
+    std::vector<float> size_list;
+    size_list.reserve(this->data.size() * 2);
+    for (auto &item: this->data) {
+        auto size = (item->bbox(this->trans)).sizes();
+        size_list.push_back(size.x());
+        size_list.push_back(size.y());
+    }
+    return vector_medium(size_list);
+}
+
 Vec2 PenGraph::adjust_size_for_rendering(
         const ScalarType &ideal_item_size,
         const ScalarType &max_render_size,
@@ -97,14 +111,7 @@ Vec2 PenGraph::adjust_size_for_rendering(
     if (this->data.empty()) {
         return {0, 0};
     }
-    std::vector<float> size_list;
-    size_list.reserve(this->data.size() * 2);
-    for (auto &item: this->data) {
-        auto size = item->bbox().sizes();
-        size_list.push_back(size.x());
-        size_list.push_back(size.y());
-    }
-    auto predicted_size = vector_medium(size_list);
+    auto predicted_size = this->get_average_item_size();
     this->dot(ideal_item_size / predicted_size);
     this->move_tl_to(Vec2{0, 0});
     auto size = this->PenOp::bbox().sizes();
